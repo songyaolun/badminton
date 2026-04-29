@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>场次详情</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body {
+      background: #F5F5F5;
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      height: 52px;
+      background: #1976D2;
+      color: white;
+    }
+    .back-link {
+      color: white;
+      text-decoration: none;
+      font-size: 15px;
+    }
+    .back-link:hover { opacity: 0.85; }
+    .share-btn {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 32px;
+    }
+    .share-btn:hover { background: rgba(255,255,255,0.3); }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    .card {
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 12px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin: 0 0 16px 0;
+    }
+    .info-row {
+      display: flex;
+      align-items: baseline;
+      margin-bottom: 10px;
+      font-size: 15px;
+    }
+    .info-label {
+      color: #888;
+      min-width: 80px;
+      flex-shrink: 0;
+    }
+    .info-value {
+      color: #222;
+      flex: 1;
+    }
+    .expired-banner {
+      background: #EEEEEE;
+      color: #757575;
+      border-radius: 8px;
+      padding: 12px 16px;
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    .count-line {
+      font-size: 15px;
+      color: #555;
+      margin-bottom: 12px;
+    }
+    .count-full {
+      display: inline-block;
+      background: #EEEEEE;
+      color: #757575;
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-size: 14px;
+    }
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #555;
+      margin-bottom: 5px;
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      border: 1px solid #E0E0E0;
+      border-radius: 4px;
+      padding: 10px;
+      font-size: 15px;
+      font-family: system-ui, -apple-system, sans-serif;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: #1976D2;
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .form-hint {
+      font-size: 12px;
+      color: #888;
+      margin-top: 4px;
+    }
+    .btn-primary {
+      min-height: 44px;
+      background: #1976D2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 0 20px;
+    }
+    .btn-primary:hover { background: #1565C0; }
+    .btn-primary:disabled { background: #90CAF9; cursor: not-allowed; }
+    .btn-primary.full-width { width: 100%; }
+    .btn-secondary {
+      min-height: 44px;
+      background: white;
+      color: #1976D2;
+      border: 1px solid #1976D2;
+      border-radius: 4px;
+      font-size: 15px;
+      cursor: pointer;
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 0 20px;
+    }
+    .btn-secondary:hover { background: #E3F2FD; }
+    .btn-danger {
+      min-height: 44px;
+      background: #D32F2F;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 0 20px;
+    }
+    .btn-danger:hover { background: #B71C1C; }
+    .btn-danger:disabled { background: #EF9A9A; cursor: not-allowed; }
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .error-msg {
+      background: #FFEBEE;
+      color: #C62828;
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-size: 14px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .error-msg.visible { display: block; }
+    .success-msg {
+      background: #E8F5E9;
+      color: #2E7D32;
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-size: 14px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .success-msg.visible { display: block; }
+    .signup-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .signup-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #F0F0F0;
+      gap: 8px;
+    }
+    .signup-item:last-child { border-bottom: none; }
+    .signup-name {
+      font-size: 15px;
+      color: #222;
+      font-weight: 500;
+      flex: 1;
+    }
+    .signup-time {
+      font-size: 13px;
+      color: #888;
+    }
+    .cancel-link {
+      font-size: 13px;
+      color: #D32F2F;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      text-decoration: underline;
+      white-space: nowrap;
+    }
+    .cancel-link:hover { color: #B71C1C; }
+    .cancel-inline {
+      display: none;
+      margin-top: 8px;
+      padding: 10px;
+      background: #FFF8F8;
+      border-radius: 4px;
+      border: 1px solid #FFCDD2;
+    }
+    .cancel-inline.visible { display: block; }
+    .cancel-inline input {
+      width: 100%;
+      border: 1px solid #E0E0E0;
+      border-radius: 4px;
+      padding: 8px 10px;
+      font-size: 14px;
+      font-family: system-ui, -apple-system, sans-serif;
+      box-sizing: border-box;
+      outline: none;
+      margin-bottom: 8px;
+    }
+    .cancel-inline input:focus { border-color: #D32F2F; }
+    .cancel-inline-btns {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-cancel-confirm {
+      min-height: 36px;
+      background: #D32F2F;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 0 14px;
+    }
+    .btn-cancel-confirm:hover { background: #B71C1C; }
+    .btn-cancel-confirm:disabled { background: #EF9A9A; cursor: not-allowed; }
+    .btn-cancel-abort {
+      min-height: 36px;
+      background: white;
+      color: #555;
+      border: 1px solid #E0E0E0;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 0 14px;
+    }
+    .btn-cancel-abort:hover { background: #F5F5F5; }
+    .inline-error {
+      font-size: 13px;
+      color: #C62828;
+      margin-top: 6px;
+      display: none;
+    }
+    .inline-error.visible { display: block; }
+    .empty-hint {
+      color: #BDBDBD;
+      font-size: 14px;
+      text-align: center;
+      padding: 16px 0 4px;
+    }
+    .section-divider {
+      height: 1px;
+      background: #F0F0F0;
+      margin: 12px 0;
+    }
+    #editSection { display: none; }
+    #cancelSection { display: none; }
+    .cancel-section-inner {
+      padding: 14px;
+      background: #FFF8F8;
+      border-radius: 4px;
+      border: 1px solid #FFCDD2;
+    }
+    .cancel-section-inner p {
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: #555;
+    }
+    .cancel-section-inner input {
+      width: 100%;
+      border: 1px solid #E0E0E0;
+      border-radius: 4px;
+      padding: 10px;
+      font-size: 15px;
+      font-family: system-ui, -apple-system, sans-serif;
+      box-sizing: border-box;
+      outline: none;
+      margin-bottom: 10px;
+    }
+    .cancel-section-inner input:focus { border-color: #D32F2F; }
+    .loading {
+      text-align: center;
+      color: #888;
+      padding: 40px 0;
+      font-size: 15px;
+    }
+
+    /* Share modal */
+    .share-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .share-modal-overlay.visible { display: flex; }
+    .share-modal-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px 20px 20px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    }
+    .share-modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #222;
+      margin-bottom: 12px;
+    }
+    .share-modal-input {
+      width: 100%;
+      border: 1px solid #E0E0E0;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: #333;
+      background: #F9F9F9;
+      box-sizing: border-box;
+      word-break: break-all;
+      outline: none;
+      -webkit-user-select: all;
+      user-select: all;
+    }
+    .share-modal-hint {
+      font-size: 12px;
+      color: #888;
+      margin: 8px 0 16px;
+    }
+    .share-modal-btns { display: flex; gap: 10px; }
+    .share-modal-copy {
+      flex: 1;
+      height: 42px;
+      background: #1976D2;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .share-modal-copy:active { background: #1565C0; }
+    .share-modal-close {
+      height: 42px;
+      padding: 0 18px;
+      background: #fff;
+      color: #555;
+      border: 1px solid #E0E0E0;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .share-modal-close:active { background: #F5F5F5; }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <a href="/space.html" class="back-link">← 返回</a>
+    <button class="share-btn" id="shareBtn">分享</button>
+  </div>
+
+  <div class="container" id="mainContainer">
+    <div class="loading">加载中...</div>
+  </div>
+
+  <!-- Share modal (iOS WeChat fallback) -->
+  <div class="share-modal-overlay" id="shareModal">
+    <div class="share-modal-box">
+      <div class="share-modal-title">分享链接</div>
+      <input class="share-modal-input" id="shareModalInput" type="text" readonly>
+      <div class="share-modal-hint">长按输入框 → 全选 → 复制，或点击下方复制按钮</div>
+      <div class="share-modal-btns">
+        <button class="share-modal-copy" id="shareModalCopyBtn">复制链接</button>
+        <button class="share-modal-close" id="shareModalCloseBtn">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/lib/api.js"></script>
+  <script>
+    (async () => {
+      const params = new URLSearchParams(window.location.search);
+      const shareToken = params.get('share');
+
+      if (shareToken) {
+        try {
+          const decoded = await api.decodeShare(shareToken);
+          await api.enterSpace(decoded.key);
+          history.replaceState(null, '', '/session.html?id=' + decoded.session_id);
+          params.delete('share');
+        } catch (e) {
+          renderError('分享链接无效或已过期');
+          return;
+        }
+      } else {
+        api.requireAuth();
+      }
+
+      const sessionId = new URLSearchParams(window.location.search).get('id');
+      if (!sessionId) {
+        renderError('缺少场次 ID');
+        return;
+      }
+
+      let session = null;
+      let signups = [];
+
+      try {
+        [session, signups] = await Promise.all([
+          api.getSession(sessionId),
+          api.getSignups(sessionId),
+        ]);
+      } catch (e) {
+        renderError('加载场次信息失败，请刷新重试');
+        return;
+      }
+
+      renderPage(session, signups);
+
+      // Pre-fetch the share URL so the click handler can call clipboard synchronously.
+      // iOS WebKit requires clipboard.writeText() to be called within a synchronous
+      // user-gesture context — any await before it breaks the gesture chain.
+      let _cachedShareUrl = null;
+      api.getShareUrl(sessionId).then(url => { _cachedShareUrl = url; }).catch(() => {});
+
+      function _copyToClipboard(url) {
+        // Try the modern clipboard API first (called synchronously = iOS gesture preserved)
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(() => {
+            const btn = document.getElementById('shareBtn');
+            const orig = btn.textContent;
+            btn.textContent = '已复制！';
+            setTimeout(() => { btn.textContent = orig; }, 2000);
+          }).catch(() => { _showShareModal(url); });
+          return;
+        }
+        // execCommand fallback (older WebViews)
+        const el = document.createElement('input');
+        el.value = url;
+        el.setAttribute('readonly', '');
+        el.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+        document.body.appendChild(el);
+        el.focus();
+        el.select();
+        el.setSelectionRange(0, url.length);
+        const ok = document.execCommand('copy');
+        document.body.removeChild(el);
+        if (ok) {
+          const btn = document.getElementById('shareBtn');
+          const orig = btn.textContent;
+          btn.textContent = '已复制！';
+          setTimeout(() => { btn.textContent = orig; }, 2000);
+        } else {
+          _showShareModal(url);
+        }
+      }
+
+      function _showShareModal(url) {
+        const modal = document.getElementById('shareModal');
+        const input = document.getElementById('shareModalInput');
+        input.value = url;
+        modal.classList.add('visible');
+        setTimeout(() => {
+          input.focus();
+          input.setSelectionRange(0, url.length);
+        }, 120);
+      }
+
+      document.getElementById('shareModalCloseBtn').addEventListener('click', () => {
+        document.getElementById('shareModal').classList.remove('visible');
+      });
+
+      document.getElementById('shareModalCopyBtn').addEventListener('click', () => {
+        const url = document.getElementById('shareModalInput').value;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(() => {
+            document.getElementById('shareModal').classList.remove('visible');
+            const btn = document.getElementById('shareBtn');
+            const orig = btn.textContent;
+            btn.textContent = '已复制！';
+            setTimeout(() => { btn.textContent = orig; }, 2000);
+          }).catch(() => {});
+        }
+      });
+
+      // Share button: synchronous handler — no await before clipboard call.
+      // Re-read sessionId from the current URL to guard against WeChat iOS page cache
+      // serving a stale JS context with a different session's closure variable.
+      document.getElementById('shareBtn').addEventListener('click', () => {
+        const currentId = new URLSearchParams(window.location.search).get('id') || sessionId;
+
+        if (_cachedShareUrl) {
+          _copyToClipboard(_cachedShareUrl);
+        } else {
+          // Pre-fetch not done yet — fetch now, then show modal (can't use clipboard after async)
+          const btn = document.getElementById('shareBtn');
+          btn.disabled = true;
+          btn.textContent = '生成中...';
+          api.getShareUrl(currentId).then(url => {
+            _cachedShareUrl = url;
+            btn.disabled = false;
+            btn.textContent = '分享';
+            _showShareModal(url);
+          }).catch(() => {
+            btn.disabled = false;
+            btn.textContent = '分享';
+            alert('生成链接失败，请重试');
+          });
+        }
+      });
+
+      function renderError(msg) {
+        const container = document.getElementById('mainContainer');
+        container.innerHTML = '<div class="card"><p style="color:#C62828;text-align:center;">' + escHtml(msg) + '</p></div>';
+      }
+
+      function escHtml(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      function formatCreated(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        const mo = d.getMonth() + 1;
+        const day = d.getDate();
+        const h = String(d.getHours()).padStart(2, '0');
+        const m = String(d.getMinutes()).padStart(2, '0');
+        return mo + '月' + day + '日 ' + h + ':' + m;
+      }
+
+      function renderPage(session, signups) {
+        const expired = api.isExpired(session);
+        const isFull = signups.length >= session.max_players;
+        const container = document.getElementById('mainContainer');
+        container.innerHTML = '';
+
+        if (expired) {
+          const banner = document.createElement('div');
+          banner.className = 'expired-banner';
+          banner.textContent = '此场次已过期';
+          container.appendChild(banner);
+        }
+
+        const infoCard = document.createElement('div');
+        infoCard.className = 'card';
+        infoCard.innerHTML = '<h2 class="card-title">场次信息</h2>';
+        const rows = [
+          ['日期', api.formatDate(session.date)],
+          ['时间段', api.formatTime(session.start_time, session.end_time)],
+          ['场地名称', session.venue],
+          ['人数上限', session.max_players + ' 人'],
+          ['发布人', session.organizer],
+        ];
+        rows.forEach(([label, value]) => {
+          const row = document.createElement('div');
+          row.className = 'info-row';
+          row.innerHTML = '<span class="info-label">' + escHtml(label) + '</span><span class="info-value">' + escHtml(String(value)) + '</span>';
+          infoCard.appendChild(row);
+        });
+        if (session.note) {
+          const row = document.createElement('div');
+          row.className = 'info-row';
+          row.innerHTML = '<span class="info-label">备注</span><span class="info-value">' + escHtml(session.note) + '</span>';
+          infoCard.appendChild(row);
+        }
+        if (session.private) {
+          const privateRow = document.createElement('div');
+          privateRow.className = 'info-row';
+          privateRow.innerHTML = '<span class="info-label">场次类型</span><span class="info-value" style="color:#7B1FA2;font-weight:600;">私密场次（仅限分享链接访问）</span>';
+          infoCard.appendChild(privateRow);
+        }
+        container.appendChild(infoCard);
+
+        if (!expired) {
+          const signupCard = document.createElement('div');
+          signupCard.className = 'card';
+          signupCard.id = 'signupCard';
+
+          const countLine = document.createElement('div');
+          countLine.className = 'count-line';
+          countLine.id = 'countLine';
+          countLine.textContent = '当前报名：' + signups.length + ' / ' + session.max_players + ' 人';
+          signupCard.appendChild(countLine);
+
+          if (isFull) {
+            const fullSpan = document.createElement('div');
+            fullSpan.className = 'count-full';
+            fullSpan.textContent = '报名已满';
+            signupCard.appendChild(fullSpan);
+          } else {
+            const signupForm = document.createElement('div');
+            signupForm.id = 'signupForm';
+
+            const errDiv = document.createElement('div');
+            errDiv.className = 'error-msg';
+            errDiv.id = 'signupError';
+            signupForm.appendChild(errDiv);
+
+            const nameGroup = document.createElement('div');
+            nameGroup.className = 'form-group';
+            nameGroup.innerHTML = '<label for="signupName">姓名/昵称</label><input type="text" id="signupName" placeholder="请输入您的姓名或昵称">';
+            signupForm.appendChild(nameGroup);
+
+            const codeGroup = document.createElement('div');
+            codeGroup.className = 'form-group';
+            codeGroup.innerHTML = '<label for="signupCancelCode">取消码</label><input type="text" id="signupCancelCode" placeholder="报名后如需取消，需凭此码"><div class="form-hint">请记住您设置的取消码</div>';
+            signupForm.appendChild(codeGroup);
+
+            const submitBtn = document.createElement('button');
+            submitBtn.className = 'btn-primary full-width';
+            submitBtn.id = 'signupSubmitBtn';
+            submitBtn.textContent = '报名参加';
+            signupForm.appendChild(submitBtn);
+
+            submitBtn.addEventListener('click', async () => {
+              const name = document.getElementById('signupName').value.trim();
+              const code = document.getElementById('signupCancelCode').value;
+              const errEl = document.getElementById('signupError');
+              errEl.classList.remove('visible');
+
+              if (!name) {
+                errEl.textContent = '请填写姓名/昵称';
+                errEl.classList.add('visible');
+                return;
+              }
+              if (!code) {
+                errEl.textContent = '请设置取消码';
+                errEl.classList.add('visible');
+                return;
+              }
+
+              submitBtn.disabled = true;
+              submitBtn.textContent = '提交中...';
+              try {
+                const newSignup = await api.createSignup(sessionId, name, code);
+                signups.push(newSignup);
+                session.max_players = session.max_players;
+                refreshSignupList(signups, session, expired);
+                document.getElementById('countLine').textContent = '当前报名：' + signups.length + ' / ' + session.max_players + ' 人';
+                if (signups.length >= session.max_players) {
+                  signupForm.remove();
+                  const fullSpan = document.createElement('div');
+                  fullSpan.className = 'count-full';
+                  fullSpan.textContent = '报名已满';
+                  document.getElementById('signupCard').insertBefore(fullSpan, document.getElementById('signupCard').querySelector('.section-divider') || null);
+                } else {
+                  document.getElementById('signupName').value = '';
+                  document.getElementById('signupCancelCode').value = '';
+                  submitBtn.disabled = false;
+                  submitBtn.textContent = '报名参加';
+                }
+              } catch (err) {
+                const errEl = document.getElementById('signupError');
+                errEl.textContent = err.message || '报名失败，请稍后重试';
+                errEl.classList.add('visible');
+                submitBtn.disabled = false;
+                submitBtn.textContent = '报名参加';
+              }
+            });
+
+            signupCard.appendChild(signupForm);
+          }
+
+          container.appendChild(signupCard);
+        }
+
+        const listCard = document.createElement('div');
+        listCard.className = 'card';
+        listCard.id = 'listCard';
+        container.appendChild(listCard);
+        refreshSignupList(signups, session, expired);
+
+        if (!expired) {
+          const actionCard = document.createElement('div');
+          actionCard.className = 'card';
+
+          const editSection = document.createElement('div');
+          editSection.id = 'editSection';
+          editSection.innerHTML = buildEditFormHtml(session);
+          actionCard.appendChild(editSection);
+
+          const cancelSection = document.createElement('div');
+          cancelSection.id = 'cancelSection';
+          cancelSection.innerHTML = '<div class="cancel-section-inner"><p>请输入取消码以确认取消场次</p><input type="text" id="sessionCancelCodeInput" placeholder="取消码"><div class="inline-error" id="cancelSessionError"></div><div class="btn-row"><button class="btn-danger" id="confirmCancelBtn">确认取消</button><button class="btn-cancel-abort" id="abortCancelBtn">放弃</button></div></div>';
+          actionCard.appendChild(cancelSection);
+
+          const btnRow = document.createElement('div');
+          btnRow.className = 'btn-row';
+          btnRow.style.marginTop = '4px';
+
+          const editBtn = document.createElement('button');
+          editBtn.className = 'btn-secondary';
+          editBtn.textContent = '修改场次';
+          btnRow.appendChild(editBtn);
+
+          const cancelBtn = document.createElement('button');
+          cancelBtn.className = 'btn-danger';
+          cancelBtn.textContent = '取消场次';
+          btnRow.appendChild(cancelBtn);
+
+          actionCard.appendChild(btnRow);
+          container.appendChild(actionCard);
+
+          editBtn.addEventListener('click', () => {
+            const es = document.getElementById('editSection');
+            const cs = document.getElementById('cancelSection');
+            cs.style.display = 'none';
+            if (es.style.display === 'block') {
+              es.style.display = 'none';
+            } else {
+              es.style.display = 'block';
+              es.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+          });
+
+          cancelBtn.addEventListener('click', () => {
+            const es = document.getElementById('editSection');
+            const cs = document.getElementById('cancelSection');
+            es.style.display = 'none';
+            if (cs.style.display === 'block') {
+              cs.style.display = 'none';
+            } else {
+              cs.style.display = 'block';
+              cs.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+          });
+
+          document.getElementById('abortCancelBtn').addEventListener('click', () => {
+            document.getElementById('cancelSection').style.display = 'none';
+          });
+
+          document.getElementById('confirmCancelBtn').addEventListener('click', async () => {
+            const code = document.getElementById('sessionCancelCodeInput').value;
+            const errEl = document.getElementById('cancelSessionError');
+            errEl.classList.remove('visible');
+            if (!code) {
+              errEl.textContent = '请输入取消码';
+              errEl.classList.add('visible');
+              return;
+            }
+            const btn = document.getElementById('confirmCancelBtn');
+            btn.disabled = true;
+            btn.textContent = '处理中...';
+            try {
+              await api.cancelSession(sessionId, code);
+              window.location.href = '/space.html';
+            } catch (err) {
+              errEl.textContent = err.message || '取消失败，请检查取消码是否正确';
+              errEl.classList.add('visible');
+              btn.disabled = false;
+              btn.textContent = '确认取消';
+            }
+          });
+
+          document.getElementById('editCancelBtn').addEventListener('click', () => {
+            document.getElementById('editSection').style.display = 'none';
+          });
+
+          document.getElementById('editSubmitBtn').addEventListener('click', async () => {
+            const errEl = document.getElementById('editError');
+            errEl.classList.remove('visible');
+
+            const startTime = document.getElementById('editStartTime').value;
+            const endTime = document.getElementById('editEndTime').value;
+            if (startTime >= endTime) {
+              errEl.textContent = '结束时间必须晚于开始时间';
+              errEl.classList.add('visible');
+              return;
+            }
+
+            const cancelCode = document.getElementById('editCancelCode').value;
+            if (!cancelCode) {
+              errEl.textContent = '请输入取消码以验证';
+              errEl.classList.add('visible');
+              return;
+            }
+
+            const data = {
+              date: document.getElementById('editDate').value,
+              start_time: startTime,
+              end_time: endTime,
+              venue: document.getElementById('editVenue').value.trim(),
+              max_players: parseInt(document.getElementById('editMaxPlayers').value, 10),
+              organizer: document.getElementById('editOrganizer').value.trim(),
+              note: document.getElementById('editNote').value.trim(),
+            };
+
+            const btn = document.getElementById('editSubmitBtn');
+            btn.disabled = true;
+            btn.textContent = '保存中...';
+            try {
+              const updated = await api.updateSession(sessionId, data, cancelCode);
+              Object.assign(session, updated);
+              document.getElementById('editSection').style.display = 'none';
+              container.innerHTML = '';
+              signups = await api.getSignups(sessionId);
+              renderPage(session, signups);
+            } catch (err) {
+              errEl.textContent = err.message || '修改失败，请检查取消码是否正确';
+              errEl.classList.add('visible');
+              btn.disabled = false;
+              btn.textContent = '保存修改';
+            }
+          });
+        }
+      }
+
+      function buildEditFormHtml(s) {
+        return '<div class="section-divider"></div>' +
+          '<h3 style="margin:0 0 14px;font-size:15px;color:#333;">修改场次信息</h3>' +
+          '<div id="editError" class="error-msg"></div>' +
+          '<div class="form-group"><label>日期</label><input type="date" id="editDate" value="' + escHtml(s.date.substring(0, 10)) + '"></div>' +
+          '<div class="form-row">' +
+          '<div class="form-group"><label>开始时间</label><input type="time" id="editStartTime" value="' + escHtml(s.start_time) + '"></div>' +
+          '<div class="form-group"><label>结束时间</label><input type="time" id="editEndTime" value="' + escHtml(s.end_time) + '"></div>' +
+          '</div>' +
+          '<div class="form-group"><label>场地名称</label><input type="text" id="editVenue" value="' + escHtml(s.venue) + '" placeholder="如：某体育馆3号馆"></div>' +
+          '<div class="form-group"><label>人数上限</label><input type="number" id="editMaxPlayers" value="' + escHtml(String(s.max_players)) + '" min="1"></div>' +
+          '<div class="form-group"><label>发布人姓名</label><input type="text" id="editOrganizer" value="' + escHtml(s.organizer) + '"></div>' +
+          '<div class="form-group"><label>备注（可选）</label><textarea id="editNote">' + escHtml(s.note || '') + '</textarea></div>' +
+          '<div class="form-group"><label>验证取消码</label><input type="text" id="editCancelCode" placeholder="输入取消码以保存修改"></div>' +
+          '<div class="btn-row">' +
+          '<button class="btn-primary" id="editSubmitBtn">保存修改</button>' +
+          '<button class="btn-cancel-abort" id="editCancelBtn">取消</button>' +
+          '</div>' +
+          '<div class="section-divider"></div>';
+      }
+
+      function refreshSignupList(signups, session, expired) {
+        const listCard = document.getElementById('listCard');
+        listCard.innerHTML = '';
+
+        const title = document.createElement('h2');
+        title.className = 'card-title';
+        title.textContent = '报名名单（' + signups.length + ' 人）';
+        listCard.appendChild(title);
+
+        if (signups.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'empty-hint';
+          empty.textContent = '还没有人报名';
+          listCard.appendChild(empty);
+          return;
+        }
+
+        const ul = document.createElement('ul');
+        ul.className = 'signup-list';
+
+        signups.forEach((signup) => {
+          const li = document.createElement('li');
+          li.className = 'signup-item';
+          li.id = 'signup-' + signup.id;
+
+          const nameEl = document.createElement('span');
+          nameEl.className = 'signup-name';
+          nameEl.textContent = signup.name;
+
+          const timeEl = document.createElement('span');
+          timeEl.className = 'signup-time';
+          timeEl.textContent = formatCreated(signup.created);
+
+          const cancelBtn = document.createElement('button');
+          cancelBtn.className = 'cancel-link';
+          cancelBtn.textContent = '取消';
+
+          const cancelInline = document.createElement('div');
+          cancelInline.className = 'cancel-inline';
+          cancelInline.innerHTML =
+            '<input type="text" placeholder="输入取消码" class="cancel-code-input">' +
+            '<div class="inline-error"></div>' +
+            '<div class="cancel-inline-btns">' +
+            '<button class="btn-cancel-confirm">确认取消</button>' +
+            '<button class="btn-cancel-abort">放弃</button>' +
+            '</div>';
+
+          const itemWrap = document.createElement('div');
+          itemWrap.style.flex = '1';
+          const topRow = document.createElement('div');
+          topRow.style.display = 'flex';
+          topRow.style.alignItems = 'center';
+          topRow.style.gap = '8px';
+          topRow.appendChild(nameEl);
+          topRow.appendChild(timeEl);
+          topRow.appendChild(cancelBtn);
+          itemWrap.appendChild(topRow);
+          itemWrap.appendChild(cancelInline);
+          li.appendChild(itemWrap);
+
+          cancelBtn.addEventListener('click', () => {
+            const isOpen = cancelInline.classList.contains('visible');
+            document.querySelectorAll('.cancel-inline.visible').forEach(el => el.classList.remove('visible'));
+            if (!isOpen) {
+              cancelInline.classList.add('visible');
+              cancelInline.querySelector('.cancel-code-input').focus();
+            }
+          });
+
+          cancelInline.querySelector('.btn-cancel-abort').addEventListener('click', () => {
+            cancelInline.classList.remove('visible');
+          });
+
+          cancelInline.querySelector('.btn-cancel-confirm').addEventListener('click', async () => {
+            const code = cancelInline.querySelector('.cancel-code-input').value;
+            const errEl = cancelInline.querySelector('.inline-error');
+            errEl.classList.remove('visible');
+            if (!code) {
+              errEl.textContent = '请输入取消码';
+              errEl.classList.add('visible');
+              return;
+            }
+            const confirmBtn = cancelInline.querySelector('.btn-cancel-confirm');
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = '处理中...';
+            try {
+              await api.cancelSignup(signup.id, code);
+              const idx = signups.findIndex(s => s.id === signup.id);
+              if (idx !== -1) signups.splice(idx, 1);
+              refreshSignupList(signups, session, expired);
+              const countLine = document.getElementById('countLine');
+              if (countLine) countLine.textContent = '当前报名：' + signups.length + ' / ' + session.max_players + ' 人';
+            } catch (err) {
+              errEl.textContent = err.message || '取消失败，请检查取消码是否正确';
+              errEl.classList.add('visible');
+              confirmBtn.disabled = false;
+              confirmBtn.textContent = '确认取消';
+            }
+          });
+
+          ul.appendChild(li);
+        });
+
+        listCard.appendChild(ul);
+      }
+    })();
+  </script>
+</body>
+</html>

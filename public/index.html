@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>羽毛球预约</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <span class="topbar-title">羽毛球预约</span>
+    </div>
+    <div class="content">
+      <div class="hero">
+        <div class="hero-icon">🏸</div>
+        <div class="hero-title">羽毛球预约</div>
+        <div class="hero-sub">输入密钥进入你的预约空间</div>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="enter">进入空间</button>
+        <button class="tab-btn" data-tab="create">创建空间</button>
+      </div>
+
+      <div id="tab-enter" class="tab-panel active">
+        <div class="form-group">
+          <label class="form-label" for="enter-key">空间密钥</label>
+          <input class="form-input" id="enter-key" type="text" placeholder="输入密钥" autocomplete="off" autocapitalize="none">
+        </div>
+        <button class="btn btn-primary" id="btn-enter">进入</button>
+        <div class="error-msg" id="enter-error"></div>
+      </div>
+
+      <div id="tab-create" class="tab-panel">
+        <div class="form-group">
+          <label class="form-label" for="create-password">创建密码</label>
+          <input class="form-input" id="create-password" type="password" placeholder="管理员设置的服务密码">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="create-key">自定义密钥</label>
+          <input class="form-input" id="create-key" type="text" placeholder="设置你的空间密钥" autocomplete="off" autocapitalize="none">
+        </div>
+        <button class="btn btn-accent" id="btn-create">创建空间</button>
+        <div class="error-msg" id="create-error"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/lib/api.js"></script>
+  <script>
+    (async () => {
+      const params = new URLSearchParams(window.location.search);
+      const shareToken = params.get('share');
+
+      if (shareToken) {
+        try {
+          const info = await api.decodeShare(shareToken);
+          await api.enterSpace(info.key);
+          window.location.href = `/session.html?id=${encodeURIComponent(info.session_id)}`;
+          return;
+        } catch {
+          showError('enter-error', '分享链接无效或已过期');
+        }
+      }
+
+      // Auto-enter space when ?key= is present (space share link)
+      const autoKey = params.get('key');
+      if (autoKey) {
+        try {
+          await api.enterSpace(autoKey);
+          window.location.href = '/space.html';
+          return;
+        } catch {
+          showError('enter-error', '空间不存在或密钥无效');
+        }
+      }
+
+      if (api.isAuthenticated()) {
+        window.location.href = '/space.html';
+        return;
+      }
+
+      const tabs = document.querySelectorAll('.tab-btn');
+      tabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+          tabs.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+          document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+          clearErrors();
+        });
+      });
+
+      function showError(id, msg) {
+        const el = document.getElementById(id);
+        el.textContent = msg;
+        el.classList.add('visible');
+      }
+
+      function clearErrors() {
+        document.querySelectorAll('.error-msg').forEach(el => {
+          el.classList.remove('visible');
+          el.textContent = '';
+        });
+      }
+
+      function setLoading(btnId, loading) {
+        const btn = document.getElementById(btnId);
+        btn.disabled = loading;
+        btn.textContent = loading ? '请稍候…' : (btnId === 'btn-enter' ? '进入' : '创建空间');
+      }
+
+      document.getElementById('btn-enter').addEventListener('click', async () => {
+        clearErrors();
+        const key = document.getElementById('enter-key').value.trim();
+        if (!key) {
+          showError('enter-error', '请输入空间密钥');
+          return;
+        }
+        setLoading('btn-enter', true);
+        try {
+          await api.enterSpace(key);
+          window.location.href = '/space.html';
+        } catch (e) {
+          showError('enter-error', e.message || '密钥错误，请重试');
+          setLoading('btn-enter', false);
+        }
+      });
+
+      document.getElementById('enter-key').addEventListener('keydown', e => {
+        if (e.key === 'Enter') document.getElementById('btn-enter').click();
+      });
+
+      document.getElementById('btn-create').addEventListener('click', async () => {
+        clearErrors();
+        const pwd = document.getElementById('create-password').value.trim();
+        const key = document.getElementById('create-key').value.trim();
+        if (!pwd) {
+          showError('create-error', '请输入创建密码');
+          return;
+        }
+        if (!key) {
+          showError('create-error', '请输入自定义密钥');
+          return;
+        }
+        setLoading('btn-create', true);
+        try {
+          await api.createSpace(pwd, key);
+          window.location.href = '/space.html';
+        } catch (e) {
+          showError('create-error', e.message || '创建失败，请检查密码或密钥');
+          setLoading('btn-create', false);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

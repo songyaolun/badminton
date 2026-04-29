@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>场次列表</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .topbar-actions { display: flex; gap: 8px; }
+    .share-modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); z-index: 100;
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .share-modal-overlay.visible { display: flex; }
+    .share-modal-box {
+      background: #fff; border-radius: 12px; padding: 24px 20px 20px;
+      width: 100%; max-width: 400px; box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    }
+    .share-modal-title { font-size: 16px; font-weight: 600; color: #222; margin-bottom: 12px; }
+    .share-modal-input {
+      width: 100%; border: 1px solid #E0E0E0; border-radius: 6px;
+      padding: 10px 12px; font-size: 13px; color: #333; background: #F9F9F9;
+      box-sizing: border-box; outline: none;
+      -webkit-user-select: all; user-select: all;
+    }
+    .share-modal-hint { font-size: 12px; color: #888; margin: 8px 0 16px; }
+    .share-modal-btns { display: flex; gap: 10px; }
+    .share-modal-copy {
+      flex: 1; height: 42px; background: #1976D2; color: #fff;
+      border: none; border-radius: 6px; font-size: 15px; font-weight: 500; cursor: pointer;
+    }
+    .share-modal-copy:active { background: #1565C0; }
+    .share-modal-close {
+      height: 42px; padding: 0 18px; background: #fff; color: #555;
+      border: 1px solid #E0E0E0; border-radius: 6px; font-size: 15px; cursor: pointer;
+    }
+    .share-modal-close:active { background: #F5F5F5; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <span class="topbar-meta" id="space-key-label"></span>
+      <div class="topbar-actions">
+        <button class="topbar-action" id="btn-share">分享空间</button>
+        <button class="topbar-action" id="btn-logout">退出</button>
+      </div>
+    </div>
+    <div class="content" id="main-content">
+      <div class="loading" id="loading-state">
+        <div class="spinner"></div>
+        <span>加载中…</span>
+      </div>
+      <div id="list-container" style="display:none"></div>
+    </div>
+  </div>
+
+  <a class="fab" href="/new.html" id="fab-new" title="发布场次">+</a>
+
+  <div class="share-modal-overlay" id="shareModal">
+    <div class="share-modal-box">
+      <div class="share-modal-title">分享空间链接</div>
+      <input class="share-modal-input" id="shareModalInput" type="text" readonly>
+      <div class="share-modal-hint">长按输入框 → 全选 → 复制，或点击下方复制按钮</div>
+      <div class="share-modal-btns">
+        <button class="share-modal-copy" id="shareModalCopyBtn">复制链接</button>
+        <button class="share-modal-close" id="shareModalCloseBtn">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/lib/api.js"></script>
+  <script>
+    (async () => {
+      api.requireAuth();
+
+      const keyLabel = document.getElementById('space-key-label');
+      const btnLogout = document.getElementById('btn-logout');
+      const loadingState = document.getElementById('loading-state');
+      const listContainer = document.getElementById('list-container');
+
+      const spaceKey = api.getSpaceKey();
+      keyLabel.textContent = spaceKey ? `空间：${spaceKey}` : '我的空间';
+
+      btnLogout.addEventListener('click', () => {
+        api.clearAuth();
+        window.location.href = '/index.html';
+      });
+
+      // Share space — URL is built synchronously, so clipboard can be called
+      // directly within the gesture handler (no iOS async-gesture issue).
+      function _getSpaceShareUrl() {
+        return window.location.origin + '/index.html?key=' + encodeURIComponent(spaceKey);
+      }
+
+      function _showSpaceShareModal(url) {
+        const input = document.getElementById('shareModalInput');
+        input.value = url;
+        document.getElementById('shareModal').classList.add('visible');
+        setTimeout(() => { input.focus(); input.setSelectionRange(0, url.length); }, 120);
+      }
+
+      document.getElementById('shareModalCloseBtn').addEventListener('click', () => {
+        document.getElementById('shareModal').classList.remove('visible');
+      });
+
+      document.getElementById('shareModalCopyBtn').addEventListener('click', () => {
+        const url = document.getElementById('shareModalInput').value;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(() => {
+            document.getElementById('shareModal').classList.remove('visible');
+            const btn = document.getElementById('btn-share');
+            const orig = btn.textContent;
+            btn.textContent = '已复制！';
+            setTimeout(() => { btn.textContent = orig; }, 2000);
+          }).catch(() => {});
+        }
+      });
+
+      document.getElementById('btn-share').addEventListener('click', () => {
+        const url = _getSpaceShareUrl();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(() => {
+            const btn = document.getElementById('btn-share');
+            const orig = btn.textContent;
+            btn.textContent = '已复制！';
+            setTimeout(() => { btn.textContent = orig; }, 2000);
+          }).catch(() => { _showSpaceShareModal(url); });
+        } else {
+          const el = document.createElement('input');
+          el.value = url;
+          el.setAttribute('readonly', '');
+          el.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+          document.body.appendChild(el);
+          el.focus(); el.select(); el.setSelectionRange(0, url.length);
+          const ok = document.execCommand('copy');
+          document.body.removeChild(el);
+          if (ok) {
+            const btn = document.getElementById('btn-share');
+            const orig = btn.textContent;
+            btn.textContent = '已复制！';
+            setTimeout(() => { btn.textContent = orig; }, 2000);
+          } else {
+            _showSpaceShareModal(url);
+          }
+        }
+      });
+
+      function renderSessions(sessions) {
+        loadingState.style.display = 'none';
+        listContainer.style.display = 'block';
+
+        if (!sessions.length) {
+          listContainer.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📋</div>
+              <div class="empty-state-text">暂无场次<br>点击右下角 + 发布</div>
+            </div>`;
+          return;
+        }
+
+        const active = sessions.filter(s => !api.isExpired(s));
+        const expired = sessions.filter(s => api.isExpired(s));
+
+        active.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+        expired.sort((a, b) => a.date > b.date ? -1 : a.date < b.date ? 1 : 0);
+
+        let html = '';
+
+        if (active.length) {
+          html += '<div class="section-title">即将开始</div>';
+          active.forEach(s => {
+            html += buildCard(s, false);
+          });
+        }
+
+        if (expired.length) {
+          html += '<div class="section-title">已过期</div>';
+          expired.forEach(s => {
+            html += buildCard(s, true);
+          });
+        }
+
+        listContainer.innerHTML = html;
+      }
+
+      function escHtml(s) {
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      function buildCard(session, expired) {
+        const date = api.formatDate(session.date);
+        const time = api.formatTime(session.start_time, session.end_time);
+        const venue = escHtml(session.venue || '');
+        const fee = session.fee != null ? `¥${session.fee}/人` : '';
+        const max = session.max_players || 0;
+        const signupCount = session.signupCount != null ? session.signupCount : (session['@expand']?.signups?.length ?? '?');
+        const isFull = max > 0 && signupCount >= max;
+        const countClass = isFull ? 'card-count full' : 'card-count';
+        const countText = max > 0 ? `已报 ${signupCount}/${max} 人` : `已报 ${signupCount} 人`;
+
+        return `
+          <a class="card${expired ? ' expired' : ''}" href="/session.html?id=${encodeURIComponent(session.id)}">
+            ${expired ? '<span class="card-badge">已过期</span>' : ''}
+            <div class="card-date">${date}</div>
+            <div class="card-time">${time}</div>
+            ${venue ? `<div class="card-venue">${venue}</div>` : ''}
+            <div class="card-meta">
+              ${fee ? `<span class="card-fee">${fee}</span>` : ''}
+              <span class="${countClass}">${countText}</span>
+            </div>
+          </a>`;
+      }
+
+      function showError(msg) {
+        loadingState.style.display = 'none';
+        listContainer.style.display = 'block';
+        listContainer.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">⚠️</div>
+            <div class="empty-state-text">${msg}</div>
+          </div>`;
+      }
+
+      try {
+        const sessions = (await api.getSessions()).filter(s => !s.private);
+
+        const signupFetches = sessions.map(async s => {
+          try {
+            const signups = await api.getSignups(s.id);
+            s.signupCount = signups.length;
+          } catch {
+            s.signupCount = 0;
+          }
+        });
+        await Promise.all(signupFetches);
+
+        renderSessions(sessions);
+      } catch (e) {
+        showError(e.message || '加载失败，请刷新重试');
+      }
+    })();
+  </script>
+</body>
+</html>

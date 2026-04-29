@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>空间详情 - 管理后台</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f5f5f5; color: #212121; font-size: 15px; }
+
+    .topbar { background: #37474F; color: #fff; padding: 14px 20px; display: flex; align-items: center; gap: 12px; }
+    .back-btn { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.35); padding: 5px 14px; border-radius: 20px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+    .back-btn:hover { background: rgba(255,255,255,0.25); }
+    .topbar-title { font-size: 17px; font-weight: 600; }
+    .topbar-sub { font-size: 13px; opacity: 0.65; }
+    .logout-btn { margin-left: auto; background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.4); padding: 6px 14px; border-radius: 20px; font-size: 13px; cursor: pointer; flex-shrink: 0; }
+    .logout-btn:hover { background: rgba(255,255,255,0.25); }
+
+    .container { max-width: 1000px; margin: 0 auto; padding: 28px 16px; }
+
+    .section-label { font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin: 24px 0 10px; display: flex; align-items: center; gap: 8px; }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: #e0e0e0; }
+
+    /* Session Card */
+    .session-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 16px; overflow: hidden; }
+    .session-card.expired { opacity: 0.65; }
+
+    .session-head { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+    .session-head-left { flex: 1; min-width: 200px; }
+    .session-date { font-size: 17px; font-weight: 700; color: #37474F; }
+    .session-time { font-size: 14px; color: #666; margin-top: 2px; }
+    .session-venue { font-size: 15px; color: #333; margin-top: 4px; }
+
+    .session-head-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+    .pill { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+    .pill-capacity { background: #E3F2FD; color: #1565C0; }
+    .pill-organizer { background: #F3E5F5; color: #6A1B9A; }
+    .pill-expired { background: #ECEFF1; color: #607D8B; }
+    .pill-active { background: #E8F5E9; color: #2E7D32; }
+    .pill-private { background: #EDE7F6; color: #4527A0; }
+
+    .session-cancel-code-row { padding: 12px 20px; background: #FFFDE7; border-bottom: 1px solid #FFF9C4; display: flex; align-items: center; gap: 12px; }
+    .session-cancel-code-label { font-size: 13px; color: #888; min-width: 72px; }
+    .cancel-code { font-family: 'SF Mono', 'Fira Code', monospace; background: #FFF9C4; border: 1px solid #F9A825; padding: 4px 12px; border-radius: 6px; color: #E65100; font-weight: 700; font-size: 15px; letter-spacing: 0.04em; user-select: all; }
+    .note-row { font-size: 13px; color: #777; padding-top: 6px; display: flex; gap: 8px; }
+    .note-label { color: #aaa; flex-shrink: 0; }
+
+    /* Signups Table */
+    .signups-section { padding: 0 20px 16px; }
+    .signups-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 0 8px; }
+    .signups-title { font-size: 13px; font-weight: 700; color: #546E7A; }
+    .signup-count { font-size: 12px; background: #ECEFF1; color: #546E7A; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th { font-size: 12px; font-weight: 600; color: #999; text-align: left; padding: 6px 12px; border-bottom: 1px solid #f0f0f0; }
+    tbody tr { transition: background 0.1s; }
+    tbody tr:hover { background: #fafafa; }
+    tbody td { padding: 9px 12px; font-size: 14px; border-bottom: 1px solid #f5f5f5; }
+    tbody tr:last-child td { border-bottom: none; }
+    .td-name { font-weight: 500; color: #212121; }
+    .td-time { color: #aaa; font-size: 13px; }
+    .td-code { font-family: 'SF Mono', 'Fira Code', monospace; background: #E8F5E9; border: 1px solid #C8E6C9; padding: 3px 10px; border-radius: 5px; color: #1B5E20; font-weight: 600; font-size: 13px; display: inline-block; user-select: all; }
+    .td-idx { color: #ccc; font-size: 12px; width: 28px; }
+
+    .empty-signups { padding: 16px 0; color: #bbb; font-size: 13px; text-align: center; }
+    .loading-state { text-align: center; padding: 60px 0; color: #bbb; font-size: 15px; }
+    .error-state { text-align: center; padding: 60px 0; color: #c62828; font-size: 15px; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="back-btn" onclick="history.back()">← 返回</button>
+  <span class="topbar-title" id="spaceTitle">空间详情</span>
+  <span class="topbar-sub" id="spaceSubtitle"></span>
+  <button class="logout-btn" onclick="logout()">退出登录</button>
+</div>
+
+<div class="container">
+  <div id="app"><div class="loading-state">加载中...</div></div>
+</div>
+
+<script>
+  const CRED_KEY = 'admin_cred';
+
+  function logout() {
+    sessionStorage.removeItem(CRED_KEY);
+    location.href = 'admin.html';
+  }
+
+  function fmtDate(s) {
+    if (!s) return '';
+    const [y, m, day] = s.substring(0, 10).split('-').map(Number);
+    const dt = new Date(y, m - 1, day);
+    const weeks = ['周日','周一','周二','周三','周四','周五','周六'];
+    return `${m}月${day}日 ${weeks[dt.getDay()]}`;
+  }
+
+  function fmtCreated(s) {
+    if (!s) return '';
+    const d = new Date(s);
+    return `${d.getMonth()+1}月${d.getDate()}日 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  function esc(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function post(path, body) {
+    const res = await fetch(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || '请求失败');
+    return data;
+  }
+
+  function isExpiredSession(s) {
+    const now = new Date();
+    const nowStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    if (s.date < nowStr) return true;
+    if (s.date > nowStr) return false;
+    const [eh, em] = s.end_time.split(':').map(Number);
+    return now.getHours() * 60 + now.getMinutes() > eh * 60 + em;
+  }
+
+  function renderSessionCard(session, signups) {
+    const expired = isExpiredSession(session);
+    const signupRows = signups.length
+      ? signups.map((sg, i) => `
+          <tr>
+            <td class="td-idx">${i + 1}</td>
+            <td class="td-name">${esc(sg.name)}</td>
+            <td class="td-time">${fmtCreated(sg.created)}</td>
+            <td><span class="td-code">${esc(sg.cancel_code)}</span></td>
+          </tr>`).join('')
+      : `<tr><td colspan="4" class="empty-signups">暂无报名</td></tr>`;
+
+    return `
+      <div class="session-card${expired ? ' expired' : ''}">
+        <div class="session-head">
+          <div class="session-head-left">
+            <div class="session-date">${esc(fmtDate(session.date))}</div>
+            <div class="session-time">${esc(session.start_time)} – ${esc(session.end_time)}</div>
+            <div class="session-venue">${esc(session.venue)}</div>
+            ${session.note ? `<div class="note-row"><span class="note-label">备注</span>${esc(session.note)}</div>` : ''}
+          </div>
+          <div class="session-head-right">
+            <span class="pill ${expired ? 'pill-expired' : 'pill-active'}">${expired ? '已结束' : '进行中 / 即将开始'}</span>
+            ${session.private ? '<span class="pill pill-private">私密</span>' : ''}
+            <span class="pill pill-capacity">上限 ${esc(String(session.max_players))} 人</span>
+            <span class="pill pill-organizer">发布人：${esc(session.organizer)}</span>
+          </div>
+        </div>
+        <div class="session-cancel-code-row">
+          <span class="session-cancel-code-label">场次取消码</span>
+          <span class="cancel-code">${esc(session.cancel_code)}</span>
+        </div>
+        <div class="signups-section">
+          <div class="signups-header">
+            <span class="signups-title">报名人员取消码</span>
+            <span class="signup-count">${signups.length} 人</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>姓名</th>
+                <th>报名时间</th>
+                <th>取消码</th>
+              </tr>
+            </thead>
+            <tbody>${signupRows}</tbody>
+          </table>
+        </div>
+      </div>`;
+  }
+
+  async function loadAll(pwd, spaceKey) {
+    const sessionsData = await post('/api/custom/admin/sessions', {
+      admin_password: pwd,
+      space_key: spaceKey,
+    });
+    const sessions = sessionsData.sessions || [];
+    if (!sessions.length) return { sessions: [], signupsMap: {} };
+
+    const signupResults = await Promise.all(
+      sessions.map(s =>
+        post('/api/custom/admin/signups', { admin_password: pwd, session_id: s.id })
+          .then(d => ({ id: s.id, signups: d.signups || [] }))
+          .catch(() => ({ id: s.id, signups: [] }))
+      )
+    );
+
+    const signupsMap = {};
+    signupResults.forEach(r => { signupsMap[r.id] = r.signups; });
+    return { sessions, signupsMap };
+  }
+
+  async function init() {
+    const raw = sessionStorage.getItem(CRED_KEY);
+    if (!raw) { location.href = 'admin.html'; return; }
+
+    let cred;
+    try { cred = JSON.parse(raw); } catch { location.href = 'admin.html'; return; }
+
+    const { pwd, spaceKey } = cred;
+    document.getElementById('spaceTitle').textContent = `空间：${spaceKey}`;
+
+    const app = document.getElementById('app');
+    try {
+      const { sessions, signupsMap } = await loadAll(pwd, spaceKey);
+
+      if (!sessions.length) {
+        app.innerHTML = '<div class="loading-state">此空间暂无场次</div>';
+        return;
+      }
+
+      const active = sessions.filter(s => !isExpiredSession(s));
+      const expired = sessions.filter(s => isExpiredSession(s));
+
+      document.getElementById('spaceSubtitle').textContent =
+        `${active.length} 个进行中 · ${expired.length} 个已结束`;
+
+      let html = '';
+      if (active.length) {
+        html += '<div class="section-label">进行中 / 即将开始</div>';
+        html += active.map(s => renderSessionCard(s, signupsMap[s.id] || [])).join('');
+      }
+      if (expired.length) {
+        html += '<div class="section-label">已结束</div>';
+        html += expired.map(s => renderSessionCard(s, signupsMap[s.id] || [])).join('');
+      }
+      app.innerHTML = html;
+    } catch (e) {
+      app.innerHTML = `<div class="error-state">${esc(e.message)}</div>`;
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
