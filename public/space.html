@@ -3,52 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>场次列表</title>
+  <title>活动列表</title>
   <link rel="stylesheet" href="/style.css">
-  <style>
-    .topbar-actions { display: flex; gap: 8px; }
-    .share-modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5); z-index: 100;
-      align-items: center; justify-content: center; padding: 24px;
-    }
-    .share-modal-overlay.visible { display: flex; }
-    .share-modal-box {
-      background: #fff; border-radius: 12px; padding: 24px 20px 20px;
-      width: 100%; max-width: 400px; box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-    }
-    .share-modal-title { font-size: 16px; font-weight: 600; color: #222; margin-bottom: 12px; }
-    .share-modal-input {
-      width: 100%; border: 1px solid #E0E0E0; border-radius: 6px;
-      padding: 10px 12px; font-size: 13px; color: #333; background: #F9F9F9;
-      box-sizing: border-box; outline: none;
-      -webkit-user-select: all; user-select: all;
-    }
-    .share-modal-hint { font-size: 12px; color: #888; margin: 8px 0 16px; }
-    .share-modal-btns { display: flex; gap: 10px; }
-    .share-modal-copy {
-      flex: 1; height: 42px; background: #1976D2; color: #fff;
-      border: none; border-radius: 6px; font-size: 15px; font-weight: 500; cursor: pointer;
-    }
-    .share-modal-copy:active { background: #1565C0; }
-    .share-modal-close {
-      height: 42px; padding: 0 18px; background: #fff; color: #555;
-      border: 1px solid #E0E0E0; border-radius: 6px; font-size: 15px; cursor: pointer;
-    }
-    .share-modal-close:active { background: #F5F5F5; }
-  </style>
 </head>
 <body>
   <div class="page">
     <div class="topbar">
+      <div class="brand-mark">✦</div>
       <span class="topbar-meta" id="space-key-label"></span>
+      <div class="topbar-spacer"></div>
       <div class="topbar-actions">
-        <button class="topbar-action" id="btn-share">分享空间</button>
+        <button class="topbar-action primary" id="btn-share">分享空间</button>
         <button class="topbar-action" id="btn-logout">退出</button>
       </div>
     </div>
     <div class="content" id="main-content">
-      <div class="loading" id="loading-state">
+      <div id="loading-state" class="loading">
         <div class="spinner"></div>
         <span>加载中…</span>
       </div>
@@ -56,7 +26,7 @@
     </div>
   </div>
 
-  <a class="fab" href="/new.html" id="fab-new" title="发布场次">+</a>
+  <a class="fab" href="/new.html" title="发布活动">+</a>
 
   <div class="share-modal-overlay" id="shareModal">
     <div class="share-modal-box">
@@ -71,30 +41,24 @@
   </div>
 
   <script src="/lib/api.js"></script>
+  <script src="/lib/activity-types.js"></script>
   <script>
     (async () => {
       api.requireAuth();
 
-      const keyLabel = document.getElementById('space-key-label');
-      const btnLogout = document.getElementById('btn-logout');
-      const loadingState = document.getElementById('loading-state');
-      const listContainer = document.getElementById('list-container');
-
       const spaceKey = api.getSpaceKey();
-      keyLabel.textContent = spaceKey ? `空间：${spaceKey}` : '我的空间';
+      document.getElementById('space-key-label').textContent = spaceKey || '我的空间';
 
-      btnLogout.addEventListener('click', () => {
+      document.getElementById('btn-logout').addEventListener('click', () => {
         api.clearAuth();
         window.location.href = '/index.html';
       });
 
-      // Share space — URL is built synchronously, so clipboard can be called
-      // directly within the gesture handler (no iOS async-gesture issue).
       function _getSpaceShareUrl() {
         return window.location.origin + '/index.html?key=' + encodeURIComponent(spaceKey);
       }
 
-      function _showSpaceShareModal(url) {
+      function _showShareModal(url) {
         const input = document.getElementById('shareModalInput');
         input.value = url;
         document.getElementById('shareModal').classList.add('visible');
@@ -126,7 +90,7 @@
             const orig = btn.textContent;
             btn.textContent = '已复制！';
             setTimeout(() => { btn.textContent = orig; }, 2000);
-          }).catch(() => { _showSpaceShareModal(url); });
+          }).catch(() => { _showShareModal(url); });
         } else {
           const el = document.createElement('input');
           el.value = url;
@@ -142,70 +106,43 @@
             btn.textContent = '已复制！';
             setTimeout(() => { btn.textContent = orig; }, 2000);
           } else {
-            _showSpaceShareModal(url);
+            _showShareModal(url);
           }
         }
       });
 
-      function renderSessions(sessions) {
-        loadingState.style.display = 'none';
-        listContainer.style.display = 'block';
-
-        if (!sessions.length) {
-          listContainer.innerHTML = `
-            <div class="empty-state">
-              <div class="empty-state-icon">📋</div>
-              <div class="empty-state-text">暂无场次<br>点击右下角 + 发布</div>
-            </div>`;
-          return;
-        }
-
-        const active = sessions.filter(s => !api.isExpired(s));
-        const expired = sessions.filter(s => api.isExpired(s));
-
-        active.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
-        expired.sort((a, b) => a.date > b.date ? -1 : a.date < b.date ? 1 : 0);
-
-        let html = '';
-
-        if (active.length) {
-          html += '<div class="section-title">即将开始</div>';
-          active.forEach(s => {
-            html += buildCard(s, false);
-          });
-        }
-
-        if (expired.length) {
-          html += '<div class="section-title">已过期</div>';
-          expired.forEach(s => {
-            html += buildCard(s, true);
-          });
-        }
-
-        listContainer.innerHTML = html;
-      }
+      let allSessions = [];
+      let activeTypeFilter = 'all';
 
       function escHtml(s) {
         return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
       }
 
       function buildCard(session, expired) {
+        const typeInfo = getActivityType(session.type || 'other');
         const date = api.formatDate(session.date);
         const time = api.formatTime(session.start_time, session.end_time);
         const venue = escHtml(session.venue || '');
-        const fee = session.fee != null ? `¥${session.fee}/人` : '';
         const max = session.max_players || 0;
-        const signupCount = session.signupCount != null ? session.signupCount : (session['@expand']?.signups?.length ?? '?');
-        const isFull = max > 0 && signupCount >= max;
-        const countClass = isFull ? 'card-count full' : 'card-count';
-        const countText = max > 0 ? `已报 ${signupCount}/${max} 人` : `已报 ${signupCount} 人`;
+        const count = session.signupCount != null ? session.signupCount : 0;
+        const isFull = max > 0 && count >= max;
+        const fee = session.fee != null && session.fee > 0 ? `¥${session.fee}/人` : '';
+
+        let statusBadge = '';
+        if (expired) statusBadge = '<span class="card-status-badge expired">已结束</span>';
+        else if (isFull) statusBadge = '<span class="card-status-badge full">已满员</span>';
+
+        const countText = max > 0 ? `已报 ${count}/${max} 人` : `已报 ${count} 人`;
+        const countClass = 'card-count' + (isFull ? ' full' : '');
 
         return `
           <a class="card${expired ? ' expired' : ''}" href="/session.html?id=${encodeURIComponent(session.id)}">
-            ${expired ? '<span class="card-badge">已过期</span>' : ''}
+            <div class="card-type-row">
+              <span class="card-type-badge">${typeInfo.icon} ${escHtml(typeInfo.name)}</span>
+              ${statusBadge}
+            </div>
             <div class="card-date">${date}</div>
-            <div class="card-time">${time}</div>
-            ${venue ? `<div class="card-venue">${venue}</div>` : ''}
+            <div class="card-time-venue">${time}${venue ? ' · ' + venue : ''}</div>
             <div class="card-meta">
               ${fee ? `<span class="card-fee">${fee}</span>` : ''}
               <span class="${countClass}">${countText}</span>
@@ -213,29 +150,107 @@
           </a>`;
       }
 
+      function renderTypeChips(sessions) {
+        const usedTypes = new Set(sessions.map(s => s.type || 'other'));
+        const chips = document.getElementById('type-chips-container');
+        if (!chips) return;
+
+        let html = '<button class="type-chip active" data-type="all">全部</button>';
+        ACTIVITY_TYPES.forEach(t => {
+          if (usedTypes.has(t.key)) {
+            html += `<button class="type-chip" data-type="${t.key}">${t.icon} ${t.name}</button>`;
+          }
+        });
+        chips.innerHTML = html;
+
+        chips.querySelectorAll('.type-chip').forEach(btn => {
+          btn.addEventListener('click', () => {
+            chips.querySelectorAll('.type-chip').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeTypeFilter = btn.dataset.type;
+            renderList();
+          });
+        });
+      }
+
+      function renderList() {
+        const filtered = activeTypeFilter === 'all'
+          ? allSessions
+          : allSessions.filter(s => (s.type || 'other') === activeTypeFilter);
+
+        const container = document.getElementById('list-container');
+        const active = filtered.filter(s => !api.isExpired(s));
+        const expired = filtered.filter(s => api.isExpired(s));
+
+        active.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+        expired.sort((a, b) => a.date > b.date ? -1 : a.date < b.date ? 1 : 0);
+
+        const listEl = document.getElementById('cards-container');
+        if (!listEl) return;
+
+        if (!filtered.length) {
+          listEl.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📋</div>
+              <div class="empty-state-text">暂无活动<br>点击右下角 + 发布</div>
+            </div>`;
+          return;
+        }
+
+        let html = '';
+        if (active.length) {
+          html += '<div class="section-title">即将开始</div>';
+          active.forEach(s => { html += buildCard(s, false); });
+        }
+        if (expired.length) {
+          html += '<div class="section-title">已结束</div>';
+          expired.forEach(s => { html += buildCard(s, true); });
+        }
+        listEl.innerHTML = html;
+      }
+
+      function renderSessions(sessions) {
+        document.getElementById('loading-state').style.display = 'none';
+        const container = document.getElementById('list-container');
+        container.style.display = 'block';
+
+        if (!sessions.length) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📋</div>
+              <div class="empty-state-text">暂无活动<br>点击右下角 + 发布</div>
+            </div>`;
+          return;
+        }
+
+        container.innerHTML = `
+          <div class="type-chips" id="type-chips-container"></div>
+          <div id="cards-container"></div>`;
+
+        renderTypeChips(sessions);
+        renderList();
+      }
+
       function showError(msg) {
-        loadingState.style.display = 'none';
-        listContainer.style.display = 'block';
-        listContainer.innerHTML = `
+        document.getElementById('loading-state').style.display = 'none';
+        const container = document.getElementById('list-container');
+        container.style.display = 'block';
+        container.innerHTML = `
           <div class="empty-state">
             <div class="empty-state-icon">⚠️</div>
-            <div class="empty-state-text">${msg}</div>
+            <div class="empty-state-text">${escHtml(msg)}</div>
           </div>`;
       }
 
       try {
         const sessions = (await api.getSessions()).filter(s => !s.private);
-
-        const signupFetches = sessions.map(async s => {
+        await Promise.all(sessions.map(async s => {
           try {
-            const signups = await api.getSignups(s.id);
-            s.signupCount = signups.length;
-          } catch {
-            s.signupCount = 0;
-          }
-        });
-        await Promise.all(signupFetches);
-
+            const sups = await api.getSignups(s.id);
+            s.signupCount = sups.length;
+          } catch { s.signupCount = 0; }
+        }));
+        allSessions = sessions;
         renderSessions(sessions);
       } catch (e) {
         showError(e.message || '加载失败，请刷新重试');

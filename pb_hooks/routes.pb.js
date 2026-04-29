@@ -29,6 +29,9 @@ routerAdd("POST", "/api/custom/sessions/create", (e) => {
     rec.set("cancel_code", cancelCode)
     rec.set("note", (b.note || "").toString())
     rec.set("private", b.private === true)
+    rec.set("type", (b.type || "other").toString())
+    const extraFields = b.extra_fields && typeof b.extra_fields === "object" ? b.extra_fields : {}
+    rec.set("extra_fields", JSON.stringify(extraFields))
     $app.save(rec)
 
     return e.json(200, rec)
@@ -217,7 +220,6 @@ routerAdd("POST", "/api/custom/sessions/update", (e) => {
     if (session.getString("space") !== auth.id) return e.json(403, { message: "Forbidden" })
     if (session.getString("cancel_code") !== cancelCode) return e.json(403, { message: "Invalid cancel_code" })
 
-    // Apply updatable fields (exclude space and cancel_code itself for safety)
     if (b.date !== undefined) session.set("date", (b.date || "").toString())
     if (b.start_time !== undefined) session.set("start_time", (b.start_time || "").toString())
     if (b.end_time !== undefined) session.set("end_time", (b.end_time || "").toString())
@@ -225,6 +227,10 @@ routerAdd("POST", "/api/custom/sessions/update", (e) => {
     if (b.max_players !== undefined) session.set("max_players", parseInt(b.max_players) || 0)
     if (b.organizer !== undefined) session.set("organizer", (b.organizer || "").toString())
     if (b.note !== undefined) session.set("note", (b.note || "").toString())
+    if (b.type !== undefined) session.set("type", (b.type || "other").toString())
+    if (b.extra_fields !== undefined && typeof b.extra_fields === "object") {
+      session.set("extra_fields", JSON.stringify(b.extra_fields))
+    }
 
     $app.save(session)
     return e.json(200, session)
@@ -340,19 +346,25 @@ routerAdd("POST", "/api/custom/admin/sessions", (e) => {
       { spaceId: space.id }
     )
 
-    const result = sessions.map((s) => ({
-      id:          s.id,
-      date:        s.getString("date"),
-      start_time:  s.getString("start_time"),
-      end_time:    s.getString("end_time"),
-      venue:       s.getString("venue"),
-      max_players: s.getInt("max_players"),
-      organizer:   s.getString("organizer"),
-      cancel_code: s.getString("cancel_code"),
-      note:        s.getString("note"),
-      private:     s.getBool("private"),
-      created:     s.getString("created"),
-    }))
+    const result = sessions.map((s) => {
+      let extraFields = {}
+      try { extraFields = JSON.parse(s.getString("extra_fields") || "{}") } catch (_) {}
+      return {
+        id:           s.id,
+        date:         s.getString("date"),
+        start_time:   s.getString("start_time"),
+        end_time:     s.getString("end_time"),
+        venue:        s.getString("venue"),
+        max_players:  s.getInt("max_players"),
+        organizer:    s.getString("organizer"),
+        cancel_code:  s.getString("cancel_code"),
+        note:         s.getString("note"),
+        private:      s.getBool("private"),
+        type:         s.getString("type") || "other",
+        extra_fields: extraFields,
+        created:      s.getString("created"),
+      }
+    })
 
     return e.json(200, { sessions: result })
   } catch (err) {

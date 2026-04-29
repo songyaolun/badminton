@@ -8,107 +8,73 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, -apple-system, sans-serif; background: #f5f5f5; color: #212121; font-size: 15px; }
 
-    .topbar { background: #37474F; color: #fff; padding: 14px 20px; display: flex; align-items: center; gap: 12px; }
+    .topbar { background: #222222; color: #fff; padding: 0 20px; height: 56px; display: flex; align-items: center; gap: 12px; }
+    .topbar-icon { font-size: 20px; }
     .topbar-title { font-size: 17px; font-weight: 600; }
-    .topbar-sub { font-size: 13px; opacity: 0.65; }
+    .topbar-sub { font-size: 13px; opacity: 0.55; }
+    .logout-btn { margin-left: auto; background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 6px 14px; border-radius: 20px; font-size: 13px; cursor: pointer; font-family: inherit; }
+    .logout-btn:hover { background: rgba(255,255,255,0.22); }
 
-    .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+    .container { max-width: 960px; margin: 0 auto; padding: 28px 16px; }
 
-    .login-card { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); padding: 32px; max-width: 400px; margin: 60px auto; }
-    .login-card h2 { font-size: 18px; margin-bottom: 20px; color: #37474F; }
-    .login-card input { width: 100%; border: 1px solid #ddd; border-radius: 6px; padding: 10px 12px; font-size: 15px; outline: none; margin-bottom: 12px; }
-    .login-card input:focus { border-color: #37474F; }
-    .login-card button { width: 100%; height: 44px; background: #37474F; color: #fff; border: none; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; }
-    .login-card button:hover { background: #263238; }
+    .login-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); padding: 36px 32px; max-width: 400px; margin: 60px auto; }
+    .login-card h2 { font-size: 19px; font-weight: 700; margin-bottom: 24px; color: #222; }
+    .login-card input { width: 100%; border: 1px solid #e0e0e0; border-radius: 8px; padding: 11px 14px; font-size: 15px; outline: none; margin-bottom: 12px; font-family: inherit; transition: border-color 0.15s; }
+    .login-card input:focus { border-color: #222; }
+    .login-card button { width: 100%; height: 48px; background: #222; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; }
+    .login-card button:hover { background: #333; }
     .login-card button:disabled { opacity: 0.5; cursor: not-allowed; }
-    .err { color: #c62828; font-size: 13px; margin-top: 8px; }
+    .err { color: #c13515; font-size: 13px; margin-top: 8px; }
 
-    .panel { display: flex; gap: 16px; align-items: flex-start; }
+    .panel { display: flex; gap: 20px; align-items: flex-start; }
 
     .sidebar { width: 220px; flex-shrink: 0; }
-    .sidebar-title { font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; padding: 0 4px; }
+    .sidebar-title { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; padding: 0 4px; }
     .space-item { padding: 10px 12px; border-radius: 8px; cursor: pointer; color: #333; font-size: 14px; margin-bottom: 4px; transition: background 0.12s; word-break: break-all; display: flex; align-items: center; justify-content: space-between; }
     .space-item:hover { background: #ECEFF1; }
-    .space-item.active { background: #37474F; color: #fff; }
+    .space-item.active { background: #222; color: #fff; }
     .space-item-arrow { font-size: 11px; color: #ccc; flex-shrink: 0; }
     .space-created { font-size: 11px; opacity: 0.6; margin-top: 2px; }
 
     .main { flex: 1; min-width: 0; }
+    .empty-state { text-align: center; padding: 80px 0; color: #bbb; font-size: 15px; }
 
-    .card { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 12px; overflow: hidden; }
-    .card-header { padding: 14px 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
-    .card-header:hover { background: #fafafa; }
-    .card-date { font-weight: 700; color: #37474F; font-size: 15px; }
-    .card-venue { color: #555; font-size: 14px; }
-    .card-meta { font-size: 13px; color: #888; margin-left: auto; }
-    .card-arrow { font-size: 12px; color: #bbb; transition: transform 0.2s; }
-    .card-arrow.open { transform: rotate(90deg); }
-
-    .session-detail { padding: 16px; border-bottom: 1px solid #f0f0f0; display: none; }
-    .session-detail.open { display: block; }
-
-    .field-row { display: flex; align-items: baseline; margin-bottom: 8px; font-size: 14px; }
-    .field-label { color: #888; min-width: 80px; flex-shrink: 0; }
-    .field-value { color: #222; }
-    .cancel-code-value { font-family: monospace; background: #FFF9C4; padding: 2px 8px; border-radius: 4px; color: #F57F17; font-weight: 600; font-size: 14px; }
-
-    .signups-section { margin-top: 12px; }
-    .signups-title { font-size: 13px; font-weight: 600; color: #888; margin-bottom: 8px; }
-    .signup-row { display: flex; align-items: center; gap: 12px; padding: 7px 0; border-bottom: 1px solid #f5f5f5; font-size: 14px; }
-    .signup-row:last-child { border-bottom: none; }
-    .signup-name { font-weight: 500; min-width: 80px; }
-    .signup-time { color: #aaa; font-size: 12px; flex: 1; }
-    .signup-code { font-family: monospace; background: #E8F5E9; padding: 2px 8px; border-radius: 4px; color: #2E7D32; font-weight: 600; font-size: 13px; }
-    .signup-empty { color: #bbb; font-size: 13px; padding: 8px 0; }
-
-    .loading-inline { color: #888; font-size: 13px; padding: 8px 0; }
-    .badge { display: inline-block; background: #ECEFF1; color: #546E7A; font-size: 11px; padding: 2px 7px; border-radius: 10px; font-weight: 600; }
-
-    .empty-state { text-align: center; padding: 60px 0; color: #bbb; font-size: 15px; }
-    .logout-btn { margin-left: auto; background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.4); padding: 6px 14px; border-radius: 20px; font-size: 13px; cursor: pointer; }
-    .logout-btn:hover { background: rgba(255,255,255,0.25); }
+    @media (max-width: 640px) {
+      .panel { flex-direction: column; }
+      .sidebar { width: 100%; }
+    }
   </style>
 </head>
 <body>
 
 <div class="topbar">
+  <span class="topbar-icon">🛡️</span>
   <span class="topbar-title">管理后台</span>
-  <span class="topbar-sub">取消码查询</span>
-  <button class="logout-btn" id="logoutBtn" style="display:none">退出</button>
+  <span class="topbar-sub">约局</span>
+  <button class="logout-btn" id="logoutBtn" style="display:none">退出登录</button>
 </div>
 
 <div class="container" id="app">
-  <!-- login -->
   <div class="login-card" id="loginSection">
     <h2>管理员登录</h2>
     <input type="password" id="pwdInput" placeholder="输入管理密码" autocomplete="current-password">
-    <button id="loginBtn">进入</button>
+    <button id="loginBtn">进入后台</button>
     <div class="err" id="loginErr"></div>
   </div>
 
-  <!-- main panel -->
   <div class="panel" id="mainSection" style="display:none">
     <div class="sidebar">
       <div class="sidebar-title">空间列表</div>
       <div id="spaceList"></div>
     </div>
     <div class="main" id="sessionMain">
-      <div class="empty-state">← 点击左侧空间进入详情</div>
+      <div class="empty-state">← 点击左侧空间查看详情</div>
     </div>
   </div>
 </div>
 
 <script>
   let ADMIN_PWD = '';
-
-  function fmtDate(s) {
-    if (!s) return '';
-    const d = s.substring(0, 10);
-    const [y, m, day] = d.split('-').map(Number);
-    const dt = new Date(y, m - 1, day);
-    const weeks = ['周日','周一','周二','周三','周四','周五','周六'];
-    return `${m}月${day}日 ${weeks[dt.getDay()]}`;
-  }
 
   function fmtCreated(s) {
     if (!s) return '';
@@ -117,7 +83,7 @@
   }
 
   function esc(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
   async function post(path, body) {
@@ -131,7 +97,6 @@
     return data;
   }
 
-  // Login
   document.getElementById('loginBtn').addEventListener('click', async () => {
     const pwd = document.getElementById('pwdInput').value;
     const err = document.getElementById('loginErr');
@@ -148,7 +113,7 @@
       renderSpaces(data.spaces || []);
     } catch (e) {
       err.textContent = e.message === 'Invalid admin_password' ? '密码错误' : e.message;
-      btn.disabled = false; btn.textContent = '进入';
+      btn.disabled = false; btn.textContent = '进入后台';
     }
   });
 
@@ -183,9 +148,8 @@
   function openSpace(el) {
     const spaceKey = el.dataset.key;
     sessionStorage.setItem('admin_cred', JSON.stringify({ pwd: ADMIN_PWD, spaceKey }));
-    window.location.href = `admin-space.html`;
+    window.location.href = 'admin-space.html';
   }
-
 </script>
 </body>
 </html>

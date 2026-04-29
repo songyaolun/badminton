@@ -3,246 +3,302 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>发布场次</title>
+  <title>发布活动</title>
   <link rel="stylesheet" href="/style.css">
   <style>
-    .page-header {
-      display: flex;
-      align-items: center;
-      padding: 16px;
-      background: #1976D2;
-      color: white;
+    body { background: var(--surface-soft); }
+    .container { max-width: 600px; margin: 0 auto; padding: 16px; }
+    .step-header { margin-bottom: 20px; }
+    .step-title { font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+    .step-sub { font-size: 14px; color: var(--muted); }
+    .form-card { background: var(--canvas); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.04); padding: 20px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 14px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; border: 1px solid var(--hairline); border-radius: 8px;
+      padding: 10px 12px; font-size: 15px; font-family: inherit;
+      box-sizing: border-box; outline: none; transition: border-color 0.15s;
+      color: var(--ink); background: var(--canvas);
+      -webkit-appearance: none; appearance: none;
     }
-    .back-link {
-      color: white;
-      text-decoration: none;
-      font-size: 15px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      border-color: var(--primary);
     }
-    .back-link:hover {
-      opacity: 0.85;
+    .form-group textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+    .form-group select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236A6A6A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .btn-submit { width: 100%; min-height: 48px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; font-family: inherit; margin-top: 8px; transition: background 0.15s; }
+    .btn-submit:hover { background: var(--primary-dark); }
+    .btn-submit:disabled { background: #ffb3c1; cursor: not-allowed; }
+    .error-msg { background: var(--error-bg); color: var(--error); border-radius: 8px; padding: 10px 14px; font-size: 14px; margin-bottom: 16px; display: none; }
+    .error-msg.visible { display: block; }
+    .selected-type-bar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; background: var(--primary-light);
+      border-radius: 10px; margin-bottom: 16px;
+      border: 1px solid rgba(255,56,92,0.2);
     }
-    .page-title {
-      flex: 1;
-      text-align: center;
-      font-size: 17px;
-      font-weight: 600;
-      margin-right: 60px;
-    }
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-    .card {
-      background: white;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-      border-radius: 8px;
-      padding: 20px;
-    }
-    .form-group {
-      margin-bottom: 16px;
-    }
-    .form-group label {
-      display: block;
-      font-size: 14px;
-      font-weight: 500;
-      color: #333;
-      margin-bottom: 6px;
-    }
-    .form-group input,
-    .form-group textarea {
-      width: 100%;
-      border: 1px solid #E0E0E0;
-      border-radius: 4px;
-      padding: 10px;
-      font-size: 15px;
-      font-family: system-ui, -apple-system, sans-serif;
-      box-sizing: border-box;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-    .form-group input:focus,
-    .form-group textarea:focus {
-      border-color: #1976D2;
-    }
-    .form-group textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    .form-hint {
-      font-size: 12px;
-      color: #888;
-      margin-top: 4px;
-    }
-    .btn-primary {
-      width: 100%;
-      min-height: 44px;
-      background: #1976D2;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 16px;
-      font-weight: 500;
-      cursor: pointer;
-      font-family: system-ui, -apple-system, sans-serif;
-      margin-top: 8px;
-    }
-    .btn-primary:hover {
-      background: #1565C0;
-    }
-    .btn-primary:disabled {
-      background: #90CAF9;
-      cursor: not-allowed;
-    }
-    .error-msg {
-      background: #FFEBEE;
-      color: #C62828;
-      border-radius: 4px;
-      padding: 10px 14px;
-      font-size: 14px;
-      margin-bottom: 16px;
-      display: none;
-    }
-    .error-msg.visible {
-      display: block;
-    }
+    .selected-type-icon { font-size: 22px; }
+    .selected-type-name { font-size: 15px; font-weight: 600; color: var(--primary); flex: 1; }
+    .change-type-btn { font-size: 13px; color: var(--primary); background: none; border: none; cursor: pointer; font-family: inherit; padding: 0; text-decoration: underline; }
+    .extra-section-divider { display: flex; align-items: center; gap: 10px; margin: 20px 0 16px; }
+    .extra-section-divider span { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
+    .extra-section-divider::before, .extra-section-divider::after { content: ''; flex: 1; height: 1px; background: var(--hairline); }
+    .check-row { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 15px; font-weight: 500; color: var(--ink); padding: 4px 0; }
+    .check-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; flex-shrink: 0; }
   </style>
 </head>
 <body>
-  <div class="page-header">
-    <a href="/space.html" class="back-link">← 返回</a>
-    <div class="page-title">发布场次</div>
+  <div style="max-width:600px;margin:0 auto;">
+    <div class="topbar" style="max-width:600px;position:sticky;top:0;z-index:10;">
+      <button class="topbar-back" id="backBtn" style="border:none;background:none;cursor:pointer;">← 返回</button>
+      <div class="topbar-spacer"></div>
+      <span class="topbar-page-title">发布活动</span>
+      <div class="topbar-spacer"></div>
+    </div>
   </div>
 
   <div class="container">
-    <div class="card">
-      <div id="errorMsg" class="error-msg"></div>
-      <form id="newSessionForm">
+    <!-- Step indicator -->
+    <div class="step-indicator">
+      <div class="step-dot active" id="dot1"></div>
+      <div class="step-dot" id="dot2"></div>
+    </div>
+
+    <!-- Step 1: Select type -->
+    <div id="step1">
+      <div class="step-header">
+        <div class="step-title">选择活动类型</div>
+        <div class="step-sub">选择你想约的活动</div>
+      </div>
+      <div class="type-grid" id="typeGrid"></div>
+    </div>
+
+    <!-- Step 2: Fill form -->
+    <div id="step2" style="display:none">
+      <div class="form-card">
+        <div class="selected-type-bar" id="selectedTypeBar"></div>
+        <div id="errorMsg" class="error-msg"></div>
+
+        <!-- Common fields -->
         <div class="form-group">
-          <label for="date">日期</label>
-          <input type="date" id="date" name="date" required>
+          <label for="date">日期 <span style="color:var(--error)">*</span></label>
+          <input type="date" id="date" required>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label for="startTime">开始时间</label>
-            <input type="time" id="startTime" name="start_time" required>
+            <label for="startTime">开始时间 <span style="color:var(--error)">*</span></label>
+            <input type="time" id="startTime" required>
           </div>
           <div class="form-group">
-            <label for="endTime">结束时间</label>
-            <input type="time" id="endTime" name="end_time" required>
+            <label for="endTime">结束时间 <span style="color:var(--error)">*</span></label>
+            <input type="time" id="endTime" required>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="venue">场地名称</label>
-          <input type="text" id="venue" name="venue" placeholder="如：某体育馆3号馆" required>
+          <label for="venue">地点 <span style="color:var(--error)">*</span></label>
+          <input type="text" id="venue" placeholder="如：某体育馆3号馆" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="maxPlayers">人数上限 <span style="color:var(--error)">*</span></label>
+            <input type="number" id="maxPlayers" min="1" required>
+          </div>
+          <div class="form-group">
+            <label for="organizer">发布人 <span style="color:var(--error)">*</span></label>
+            <input type="text" id="organizer" placeholder="你的名字">
+          </div>
         </div>
 
         <div class="form-group">
-          <label for="maxPlayers">人数上限</label>
-          <input type="number" id="maxPlayers" name="max_players" min="1" required>
+          <label for="cancelCode">取消码 <span style="color:var(--error)">*</span></label>
+          <input type="text" id="cancelCode" placeholder="设置一个取消码，用于修改/取消活动">
+          <div class="form-hint">请牢记此码，修改或取消活动时需要用到</div>
         </div>
 
-        <div class="form-group">
-          <label for="organizer">发布人姓名</label>
-          <input type="text" id="organizer" name="organizer" required>
-        </div>
+        <!-- Type-specific fields -->
+        <div id="extraFieldsContainer"></div>
 
-        <div class="form-group">
-          <label for="cancelCode">取消码</label>
-          <input type="text" id="cancelCode" name="cancel_code" placeholder="设置一个取消码（用于以后修改/取消场次）" required>
-          <div class="form-hint">请牢记此码，修改或取消场次时需要用到</div>
-        </div>
+        <!-- Common optional fields -->
+        <div class="extra-section-divider"><span>其他</span></div>
 
         <div class="form-group">
           <label for="note">备注（可选）</label>
-          <textarea id="note" name="note" placeholder="其他说明..."></textarea>
+          <textarea id="note" placeholder="其他说明..."></textarea>
         </div>
 
         <div class="form-group">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:15px;font-weight:500;color:#333;">
-            <input type="checkbox" id="privateSession" style="width:18px;height:18px;accent-color:#7B1FA2;cursor:pointer;flex-shrink:0;">
-            设为私密场次
+          <label class="check-row">
+            <input type="checkbox" id="privateSession">
+            设为私密活动
           </label>
-          <div class="form-hint">私密场次不在空间列表中公开显示，只能通过私密分享链接访问和报名</div>
+          <div class="form-hint">私密活动不在空间列表中公开，只能通过私密分享链接访问</div>
         </div>
 
-        <button type="submit" class="btn-primary" id="submitBtn">发布场次</button>
-      </form>
+        <button type="button" class="btn-submit" id="submitBtn">发布活动</button>
+      </div>
     </div>
   </div>
 
   <script src="/lib/api.js"></script>
+  <script src="/lib/activity-types.js"></script>
   <script>
     (async () => {
       api.requireAuth();
 
       const today = new Date().toISOString().split('T')[0];
       document.getElementById('date').min = today;
+      document.getElementById('date').value = today;
 
-      const form = document.getElementById('newSessionForm');
-      const errorMsg = document.getElementById('errorMsg');
-      const submitBtn = document.getElementById('submitBtn');
+      let selectedType = null;
+
+      // Back button
+      document.getElementById('backBtn').addEventListener('click', () => {
+        if (selectedType && document.getElementById('step2').style.display !== 'none') {
+          showStep(1);
+        } else {
+          window.location.href = '/space.html';
+        }
+      });
+
+      // Build type grid
+      const grid = document.getElementById('typeGrid');
+      ACTIVITY_TYPES.forEach(type => {
+        const card = document.createElement('button');
+        card.className = 'type-card';
+        card.innerHTML = `
+          <div class="type-card-icon">${type.icon}</div>
+          <div class="type-card-name">${type.name}</div>
+          <div class="type-card-desc">${type.desc}</div>`;
+        card.addEventListener('click', () => selectType(type));
+        grid.appendChild(card);
+      });
+
+      function showStep(step) {
+        document.getElementById('step1').style.display = step === 1 ? 'block' : 'none';
+        document.getElementById('step2').style.display = step === 2 ? 'block' : 'none';
+        document.getElementById('dot1').className = 'step-dot' + (step === 1 ? ' active' : '');
+        document.getElementById('dot2').className = 'step-dot' + (step === 2 ? ' active' : '');
+      }
+
+      function selectType(type) {
+        selectedType = type;
+
+        // Update selected type bar
+        const bar = document.getElementById('selectedTypeBar');
+        bar.innerHTML = `
+          <span class="selected-type-icon">${type.icon}</span>
+          <span class="selected-type-name">${type.name}</span>
+          <button class="change-type-btn" id="changeTypeBtn">换一个</button>`;
+        document.getElementById('changeTypeBtn').addEventListener('click', () => showStep(1));
+
+        // Render type-specific fields
+        renderExtraFields(type);
+
+        showStep(2);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function renderExtraFields(type) {
+        const container = document.getElementById('extraFieldsContainer');
+        if (!type.fields || !type.fields.length) {
+          container.innerHTML = '';
+          return;
+        }
+
+        let html = `<div class="extra-section-divider"><span>${type.icon} ${type.name} 专属</span></div>`;
+        type.fields.forEach(field => {
+          html += `<div class="form-group" id="extra-group-${field.key}">`;
+          html += `<label for="extra-${field.key}">${field.label}</label>`;
+          if (field.type === 'textarea') {
+            html += `<textarea id="extra-${field.key}" placeholder="${field.placeholder || ''}"></textarea>`;
+          } else if (field.type === 'select') {
+            html += `<select id="extra-${field.key}">`;
+            html += `<option value="">请选择…</option>`;
+            (field.options || []).forEach(opt => {
+              html += `<option value="${opt}">${opt}</option>`;
+            });
+            html += `</select>`;
+          } else {
+            html += `<input type="${field.type || 'text'}" id="extra-${field.key}" placeholder="${field.placeholder || ''}">`;
+          }
+          html += `</div>`;
+        });
+        container.innerHTML = html;
+      }
+
+      function getExtraFields() {
+        if (!selectedType || !selectedType.fields) return {};
+        const result = {};
+        selectedType.fields.forEach(field => {
+          const el = document.getElementById(`extra-${field.key}`);
+          if (el && el.value.trim()) {
+            result[field.key] = el.value.trim();
+          }
+        });
+        return result;
+      }
 
       function showError(msg) {
-        errorMsg.textContent = msg;
-        errorMsg.classList.add('visible');
-        errorMsg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        const el = document.getElementById('errorMsg');
+        el.textContent = msg;
+        el.classList.add('visible');
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
 
       function hideError() {
-        errorMsg.classList.remove('visible');
+        document.getElementById('errorMsg').classList.remove('visible');
       }
 
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
+      document.getElementById('submitBtn').addEventListener('click', async () => {
         hideError();
 
         const startTime = document.getElementById('startTime').value;
         const endTime = document.getElementById('endTime').value;
-
-        if (startTime >= endTime) {
-          showError('结束时间必须晚于开始时间');
-          return;
-        }
-
         const dateVal = document.getElementById('date').value;
-        if (dateVal < today) {
-          showError('日期必须是今天或以后');
-          return;
-        }
+
+        if (!dateVal) { showError('请选择日期'); return; }
+        if (!startTime) { showError('请选择开始时间'); return; }
+        if (!endTime) { showError('请选择结束时间'); return; }
+        if (startTime >= endTime) { showError('结束时间必须晚于开始时间'); return; }
+
+        const venue = document.getElementById('venue').value.trim();
+        const maxPlayers = parseInt(document.getElementById('maxPlayers').value, 10);
+        const organizer = document.getElementById('organizer').value.trim();
+        const cancelCode = document.getElementById('cancelCode').value;
+
+        if (!venue) { showError('请填写活动地点'); return; }
+        if (!maxPlayers || maxPlayers < 1) { showError('请填写有效的人数上限'); return; }
+        if (!organizer) { showError('请填写发布人姓名'); return; }
+        if (!cancelCode) { showError('请设置取消码'); return; }
 
         const data = {
           date: dateVal,
           start_time: startTime,
           end_time: endTime,
-          venue: document.getElementById('venue').value.trim(),
-          max_players: parseInt(document.getElementById('maxPlayers').value, 10),
-          organizer: document.getElementById('organizer').value.trim(),
-          cancel_code: document.getElementById('cancelCode').value,
+          venue,
+          max_players: maxPlayers,
+          organizer,
+          cancel_code: cancelCode,
           note: document.getElementById('note').value.trim(),
           private: document.getElementById('privateSession').checked,
+          type: selectedType ? selectedType.key : 'other',
+          extra_fields: getExtraFields(),
         };
 
-        submitBtn.disabled = true;
-        submitBtn.textContent = '发布中...';
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true; btn.textContent = '发布中...';
 
         try {
           const session = await api.createSession(data);
           window.location.href = '/session.html?id=' + session.id;
         } catch (err) {
           showError(err.message || '发布失败，请稍后重试');
-          submitBtn.disabled = false;
-          submitBtn.textContent = '发布场次';
+          btn.disabled = false; btn.textContent = '发布活动';
         }
       });
     })();
