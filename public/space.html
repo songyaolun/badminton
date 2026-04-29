@@ -132,8 +132,16 @@
         if (expired) statusBadge = '<span class="card-status-badge expired">已结束</span>';
         else if (isFull) statusBadge = '<span class="card-status-badge full">已满员</span>';
 
-        const countText = max > 0 ? `已报 ${count}/${max} 人` : `已报 ${count} 人`;
-        const countClass = 'card-count' + (isFull ? ' full' : '');
+        const pct = max > 0 ? Math.min(100, Math.round(count / max * 100)) : 0;
+        const countLabel = max > 0 ? `${count} / ${max}` : `${count} 人`;
+
+        const capacityBar = max > 0 ? `
+          <div class="capacity-bar-row">
+            <div class="capacity-bar-track">
+              <div class="capacity-bar-fill${isFull ? ' full' : ''}" style="width:${pct}%"></div>
+            </div>
+            <span class="capacity-bar-text">${countLabel}</span>
+          </div>` : `<div style="margin-top:10px;font-size:13px;color:#3F3F3F;">${countLabel}</div>`;
 
         return `
           <a class="card${expired ? ' expired' : ''}" href="/session.html?id=${encodeURIComponent(session.id)}">
@@ -143,10 +151,8 @@
             </div>
             <div class="card-date">${date}</div>
             <div class="card-time-venue">${time}${venue ? ' · ' + venue : ''}</div>
-            <div class="card-meta">
-              ${fee ? `<span class="card-fee">${fee}</span>` : ''}
-              <span class="${countClass}">${countText}</span>
-            </div>
+            ${fee ? `<div style="font-size:15px;font-weight:700;color:var(--primary);margin-top:6px;">${fee}</div>` : ''}
+            ${capacityBar}
           </a>`;
       }
 

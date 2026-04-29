@@ -224,6 +224,19 @@
         }
       });
 
+      function buildCapacityBar(count, max) {
+        if (!max || max <= 0) return `<span style="font-size:13px;color:#3F3F3F;">已报 ${count} 人</span>`;
+        const pct = Math.min(100, Math.round(count / max * 100));
+        const isFull = count >= max;
+        const fillColor = isFull ? 'var(--error)' : 'var(--primary)';
+        return `<div style="display:flex;align-items:center;gap:8px;">
+          <div style="flex:1;height:8px;background:var(--surface-soft);border-radius:999px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:${fillColor};border-radius:999px;transition:width .3s;"></div>
+          </div>
+          <span style="font-size:13px;color:#3F3F3F;white-space:nowrap;flex-shrink:0;">${count} / ${max}</span>
+        </div>`;
+      }
+
       function renderError(msg) {
         document.getElementById('mainContainer').innerHTML =
           '<div class="info-card"><p style="color:var(--error);text-align:center;">' + escHtml(msg) + '</p></div>';
@@ -321,9 +334,9 @@
           signupCard.id = 'signupCard';
 
           const countLine = document.createElement('div');
-          countLine.className = 'count-line';
           countLine.id = 'countLine';
-          countLine.textContent = `当前报名：${signups.length} / ${session.max_players} 人`;
+          countLine.style.marginBottom = '12px';
+          countLine.innerHTML = buildCapacityBar(signups.length, session.max_players);
           signupCard.appendChild(countLine);
 
           if (isFull) {
@@ -368,7 +381,7 @@
                 const newSignup = await api.createSignup(sessionId, name, code);
                 signups.push(newSignup);
                 refreshSignupList(signups, session, expired);
-                document.getElementById('countLine').textContent = `当前报名：${signups.length} / ${session.max_players} 人`;
+                document.getElementById('countLine').innerHTML = buildCapacityBar(signups.length, session.max_players);
                 if (signups.length >= session.max_players) {
                   signupForm.remove();
                   const fullSpan = document.createElement('div');
@@ -608,7 +621,7 @@
               if (idx !== -1) signups.splice(idx, 1);
               refreshSignupList(signups, session, expired);
               const countLine = document.getElementById('countLine');
-              if (countLine) countLine.textContent = `当前报名：${signups.length} / ${session.max_players} 人`;
+              if (countLine) countLine.innerHTML = buildCapacityBar(signups.length, session.max_players);
             } catch (err) {
               errEl.textContent = err.message || '取消失败，请检查取消码是否正确';
               errEl.classList.add('visible');
