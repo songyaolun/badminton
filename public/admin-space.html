@@ -193,13 +193,13 @@
   }
 
   async function loadAll(pwd, spaceKey) {
-    const sessionsData = await post('/api/custom/admin/sessions', { admin_password: pwd, space_key: spaceKey });
+    const sessionsData = await post('/yueju/api/custom/admin/sessions', { admin_password: pwd, space_key: spaceKey });
     const sessions = sessionsData.sessions || [];
     if (!sessions.length) return { sessions: [], signupsMap: {} };
 
     const signupResults = await Promise.all(
       sessions.map(s =>
-        post('/api/custom/admin/signups', { admin_password: pwd, session_id: s.id })
+        post('/yueju/api/custom/admin/signups', { admin_password: pwd, session_id: s.id })
           .then(d => ({ id: s.id, signups: d.signups || [] }))
           .catch(() => ({ id: s.id, signups: [] }))
       )
