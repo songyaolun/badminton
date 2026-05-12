@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>发布活动</title>
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="style.css">
   <style>
     body { background: var(--surface-soft); }
     .container { max-width: 600px; margin: 0 auto; padding: 16px; }
@@ -144,8 +144,8 @@
     </div>
   </div>
 
-  <script src="/lib/api.js"></script>
-  <script src="/lib/activity-types.js"></script>
+  <script src="lib/api.js"></script>
+  <script src="lib/activity-types.js"></script>
   <script>
     (async () => {
       api.requireAuth();
@@ -161,7 +161,7 @@
         if (selectedType && document.getElementById('step2').style.display !== 'none') {
           showStep(1);
         } else {
-          window.location.href = '/space.html';
+          window.location.href = 'space.html';
         }
       });
 
@@ -295,7 +295,7 @@
 
         try {
           const session = await api.createSession(data);
-          window.location.href = '/session.html?id=' + session.id;
+          window.location.href = 'session.html?id=' + session.id;
         } catch (err) {
           showError(err.message || '发布失败，请稍后重试');
           btn.disabled = false; btn.textContent = '发布活动';

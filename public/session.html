@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>活动详情</title>
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="style.css">
   <style>
     body { background: var(--surface-soft); }
     .container { max-width: 600px; margin: 0 auto; padding: 16px; }
@@ -90,7 +90,7 @@
 <body>
   <div style="max-width:600px;margin:0 auto;">
     <div class="topbar" style="max-width:600px;position:sticky;top:0;z-index:10;">
-      <a href="/space.html" class="topbar-back">← 返回</a>
+      <a href="space.html" class="topbar-back">← 返回</a>
       <div class="topbar-spacer"></div>
       <button class="topbar-action" id="shareBtn">分享</button>
     </div>
@@ -115,8 +115,8 @@
     </div>
   </div>
 
-  <script src="/lib/api.js"></script>
-  <script src="/lib/activity-types.js"></script>
+  <script src="lib/api.js"></script>
+  <script src="lib/activity-types.js"></script>
   <script>
     (async () => {
       const params = new URLSearchParams(window.location.search);
@@ -126,7 +126,7 @@
         try {
           const decoded = await api.decodeShare(shareToken);
           await api.enterSpace(decoded.key);
-          history.replaceState(null, '', '/session.html?id=' + decoded.session_id);
+          history.replaceState(null, '', '?id=' + decoded.session_id);
         } catch (e) {
           renderError('分享链接无效或已过期');
           return;
@@ -474,7 +474,7 @@
             btn.disabled = true; btn.textContent = '处理中...';
             try {
               await api.cancelSession(sessionId, code);
-              window.location.href = '/space.html';
+              window.location.href = 'space.html';
             } catch (err) {
               errEl.textContent = err.message || '取消失败，请检查取消码是否正确';
               errEl.classList.add('visible');

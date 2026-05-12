@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>活动列表</title>
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="page">
@@ -26,7 +26,7 @@
     </div>
   </div>
 
-  <a class="fab" href="/new.html" title="发布活动">+</a>
+  <a class="fab" href="new.html" title="发布活动">+</a>
 
   <div class="share-modal-overlay" id="shareModal">
     <div class="share-modal-box">
@@ -40,8 +40,8 @@
     </div>
   </div>
 
-  <script src="/lib/api.js"></script>
-  <script src="/lib/activity-types.js"></script>
+  <script src="lib/api.js"></script>
+  <script src="lib/activity-types.js"></script>
   <script>
     (async () => {
       api.requireAuth();
@@ -51,11 +51,12 @@
 
       document.getElementById('btn-logout').addEventListener('click', () => {
         api.clearAuth();
-        window.location.href = '/index.html';
+        window.location.href = 'index.html';
       });
 
       function _getSpaceShareUrl() {
-        return window.location.origin + '/index.html?key=' + encodeURIComponent(spaceKey);
+        const pathBase = window.location.pathname.replace(/\/[^/]*$/, '/');
+        return window.location.origin + pathBase + 'index.html?key=' + encodeURIComponent(spaceKey);
       }
 
       function _showShareModal(url) {
@@ -144,7 +145,7 @@
           </div>` : `<div style="margin-top:10px;font-size:13px;color:#3F3F3F;">${countLabel}</div>`;
 
         return `
-          <a class="card${expired ? ' expired' : ''}" href="/session.html?id=${encodeURIComponent(session.id)}">
+          <a class="card${expired ? ' expired' : ''}" href="session.html?id=${encodeURIComponent(session.id)}">
             <div class="card-type-row">
               <span class="card-type-badge">${typeInfo.icon} ${escHtml(typeInfo.name)}</span>
               ${statusBadge}

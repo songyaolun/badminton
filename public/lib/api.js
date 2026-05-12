@@ -92,7 +92,7 @@ const api = (() => {
 
   function requireAuth() {
     if (!isAuthenticated()) {
-      window.location.href = '/index.html';
+      window.location.href = 'index.html';
     }
   }
 
@@ -162,7 +162,8 @@ const api = (() => {
 
   async function getShareUrl(sessionId) {
     const token = await encodeShare(sessionId);
-    return `${window.location.origin}/session.html?share=${encodeURIComponent(token)}`;
+    const pathBase = window.location.pathname.replace(/\/[^/]*$/, '/');
+    return `${window.location.origin}${pathBase}session.html?share=${encodeURIComponent(token)}`;
   }
 
   function isExpired(session) {

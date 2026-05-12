@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>约局 · 熟人活动预约</title>
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="page">
@@ -49,7 +49,7 @@
     </div>
   </div>
 
-  <script src="/lib/api.js"></script>
+  <script src="lib/api.js"></script>
   <script>
     (async () => {
       const params = new URLSearchParams(window.location.search);
@@ -59,7 +59,7 @@
         try {
           const info = await api.decodeShare(shareToken);
           await api.enterSpace(info.key);
-          window.location.href = `/session.html?id=${encodeURIComponent(info.session_id)}`;
+          window.location.href = `session.html?id=${encodeURIComponent(info.session_id)}`;
           return;
         } catch {
           showError('enter-error', '分享链接无效或已过期');
@@ -70,7 +70,7 @@
       if (autoKey) {
         try {
           await api.enterSpace(autoKey);
-          window.location.href = '/space.html';
+          window.location.href = 'space.html';
           return;
         } catch {
           showError('enter-error', '空间不存在或密钥无效');
@@ -78,7 +78,7 @@
       }
 
       if (api.isAuthenticated()) {
-        window.location.href = '/space.html';
+        window.location.href = 'space.html';
         return;
       }
 
@@ -119,7 +119,7 @@
         setLoading('btn-enter', true, '进入空间');
         try {
           await api.enterSpace(key);
-          window.location.href = '/space.html';
+          window.location.href = 'space.html';
         } catch (e) {
           showError('enter-error', e.message || '密钥错误，请重试');
           setLoading('btn-enter', false, '进入空间');
@@ -139,7 +139,7 @@
         setLoading('btn-create', true, '创建空间');
         try {
           await api.createSpace(pwd, key);
-          window.location.href = '/space.html';
+          window.location.href = 'space.html';
         } catch (e) {
           showError('create-error', e.message || '创建失败，请检查密码或密钥');
           setLoading('btn-create', false, '创建空间');
