@@ -92,7 +92,7 @@ const api = (() => {
 
   function requireAuth() {
     if (!isAuthenticated()) {
-      window.location.href = 'index.html';
+      window.location.href = './';
     }
   }
 

@@ -51,12 +51,12 @@
 
       document.getElementById('btn-logout').addEventListener('click', () => {
         api.clearAuth();
-        window.location.href = 'index.html';
+        window.location.href = './';
       });
 
       function _getSpaceShareUrl() {
         const pathBase = window.location.pathname.replace(/\/[^/]*$/, '/');
-        return window.location.origin + pathBase + 'index.html?key=' + encodeURIComponent(spaceKey);
+        return window.location.origin + pathBase + '?key=' + encodeURIComponent(spaceKey);
       }
 
       function _showShareModal(url) {
