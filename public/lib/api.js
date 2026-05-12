@@ -2,7 +2,7 @@ const api = (() => {
   const TOKEN_KEY = 'pb_token';
   const SPACE_KEY = 'pb_key';
   const SPACE_ID_KEY = 'pb_space_id';
-  const BASE = '/yueju';
+  const BASE = '';
 
   const ERROR_MAP = {
     'Invalid create_password':                    '创建密码错误',
